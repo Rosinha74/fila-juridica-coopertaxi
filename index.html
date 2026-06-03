@@ -31,6 +31,19 @@
         grid-template-columns: 1fr;
     }
 
+    .fila-container {
+        min-height: 450px !important;
+        max-height: 600px !important;
+    }
+
+    .chat-container {
+        max-height: 250px !important;
+    }
+}
+    .container {
+        grid-template-columns: 1fr;
+    }
+
     .fila-espera {
         min-height: 70vh !important;
     }
@@ -231,10 +244,12 @@
     }
 
     .fila-container {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 8px;
-      max-height: 600px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    min-height: 450px;
+    max-height: 700px;
+}
     }
 
     .fila-container::-webkit-scrollbar {
