@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recepção Jurídica - CooperTaxi</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 20px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1200px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .coluna-esquerda {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .coluna-direita {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      border-bottom: 4px solid #667eea;
+      padding-bottom: 15px;
+    }
+
+    h2 {
+      color: #555;
+      margin: 20px 0 15px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .btn-gerar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 18px;
+      padding: 16px;
+    }
+
+    .btn-gerar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-zerar {
+      background: #ff6b6b;
+      color: white;
+      font-size: 18px;
+      padding: 16px;
+    }
+
+    .btn-zerar:hover {
+      background: #ff5252;
+    }
+
+    .btn-atender {
+      background: #51cf66;
+      color: white;
+      font-size: 14px;
+      padding: 10px;
+      flex: 1;
+    }
+
+    .btn-atender:hover {
+      background: #40c057;
+    }
+
+    .btn-excluir {
+      background: #ff922b;
+      color: white;
+      font-size: 14px;
+      padding: 10px;
+      flex: 1;
+    }
+
+    .btn-excluir:hover {
+      background: #ff8c00;
+    }
+
+    .btn-enviar {
+      background: #667eea;
+      color: white;
+      padding: 10px;
+      font-size: 14px;
+      width: auto;
+      margin: 0;
+    }
+
+    .btn-enviar:hover {
+      background: #5568d3;
+    }
+
+    .card {
+      background: #f8f9fa;
+      padding: 18px;
+      border-radius: 10px;
+      margin: 12px 0;
+      border-left: 5px solid #667eea;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .senha {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .cooperado {
+      background: #d4a017;
+    }
+
+    .auxiliar {
+      background: #1565c0;
+    }
+
+    .info {
+      font-size: 15px;
+      color: #555;
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    .msg {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 4px solid #667eea;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .fila-container {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+      max-height: 600px;
+    }
+
+    .fila-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .fila-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .fila-container::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    .atendidos-container {
+      max-height: 150px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .atendidos-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .atendidos-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .atendidos-container::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    .card-atendido {
+      border-left-color: #51cf66;
+      opacity: 0.6;
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 220px;
+    }
+
+    .chat-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chat-tab {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .chat-tab.ativo {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    .chat-message {
+      margin: 6px 0;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      word-wrap: break-word;
+    }
+
+    .chat-message.enviado {
+      background: #667eea;
+      color: white;
+      text-align: right;
+    }
+
+    .chat-message.recebido {
+      background: #e9ecef;
+      color: #333;
+    }
+
+    .chat-message.lido {
+      opacity: 0.7;
+    }
+
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-group input {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+      margin: 0;
+      transition: border-color 0.3s;
+    }
+
+    .chat-input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .numero-senha {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      text-align: center;
+      margin: 20px 0;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .botoes-grupo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .botoes-grupo button {
+      margin: 0;
+    }
+
+    .card-acoes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .card-acoes button {
+      margin: 0;
+    }
+
+    .box-fila-principal {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .box-chat-pequeno {
+      height: auto;
+    }
+
+    .notificacao-badge {
+      display: inline-block;
+      background: #ff6b6b;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      margin-left: 8px;
+      animation: pulse 0.6s infinite;
+    }
+
+    .aviso-mensagem {
+      background: #fff3bf;
+      border: 2px solid #ffc107;
+      color: #856404;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      text-align: center;
+      animation: pulse 0.6s infinite;
+    }
+
+    .status-online {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #51cf66;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .status-offline {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .status-info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+      padding: 8px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .vazio {
+      text-align: center;
+      color: #999;
+      padding: 15px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- COLUNA ESQUERDA: GERAÇÃO DE SENHAS -->
+  <div class="coluna-esquerda">
+    <div class="box">
+      <h1>🎫 Gerar Senha</h1>
+
+      <div class="numero-senha">
+        Nº <span id="proximaSenha">1</span>
+      </div>
+
+      <input id="prefixo" placeholder="Prefixo / Numeral" maxlength="10">
+      <input id="nome" placeholder="Nome do Cliente">
+
+      <select id="tipo">
+        <option>Cooperado</option>
+        <option>Auxiliar</option>
+      </select>
+
+      <textarea id="recado" placeholder="Observações ou recado"></textarea>
+
+      <div class="botoes-grupo">
+        <button class="btn-gerar" onclick="gerarSenha()">✅ GERAR</button>
+        <button class="btn-zerar" onclick="zerarFila()">🔄 ZERAR</button>
+      </div>
+
+      <div class="status-info">
+        <span id="status-icon" class="status-online"></span>
+        <span id="status-texto">Online</span>
+      </div>
+    </div>
+
+    <!-- ATENDIDOS PEQUENO -->
+    <div class="box">
+      <h2>✅ Atendidos</h2>
+      <div id="atendidos" class="atendidos-container"></div>
+    </div>
+  </div>
+
+  <!-- COLUNA DIREITA: FILA E CHAT -->
+  <div class="coluna-direita">
+    <!-- FILA PRINCIPAL EM DESTAQUE -->
+    <div class="box box-fila-principal">
+      <h1>📋 Fila de Espera</h1>
+      <div id="fila" class="fila-container"></div>
+    </div>
+
+    <!-- CHAT PEQUENO EMBAIXO -->
+    <div class="box box-chat-pequeno">
+      <h2>💬 Chat com Advogada <span id="badge-nao-lidas" class="notificacao-badge" style="display:none;">0</span></h2>
+      <div id="aviso-mensagem"></div>
+      <div class="chat-container">
+        <div class="chat-tabs">
+          <div class="chat-tab ativo" onclick="mudarAba('nao-lidas')">📨 Não Lidas</div>
+          <div class="chat-tab" onclick="mudarAba('lidas')">✅ Lidas</div>
+        </div>
+        <div id="chat" class="chat-messages"></div>
+        <div class="chat-input-group">
+          <input id="mensagem" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') enviarMensagem()">
+          <button class="btn-enviar" onclick="enviarMensagem()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC58wsopM1NySU4EZclGuwhgzVUeVf4B_k",
+  authDomain: "senha-36ecb.firebaseapp.com",
+  projectId: "senha-36ecb",
+  storageBucket: "senha-36ecb.firebasestorage.app",
+  messagingSenderId: "512666147464",
+  appId: "1:512666147464:web:8b040b147f27314ffa5d3d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let proximaSenha = 1;
+let abaAtiva = "nao-lidas";
+let todasAsMensagens = [];
+let ultimaMensagemNotificada = 0;
+
+// ===== DETECÇÃO DE CONEXÃO =====
+
+function atualizarStatusConexao() {
+  const statusIcon = document.getElementById("status-icon");
+  const statusTexto = document.getElementById("status-texto");
+
+  if (navigator.onLine) {
+    statusIcon.className = "status-online";
+    statusTexto.innerText = "Online";
+  } else {
+    statusIcon.className = "status-offline";
+    statusTexto.innerText = "Offline";
+  }
+}
+
+window.addEventListener("online", atualizarStatusConexao);
+window.addEventListener("offline", atualizarStatusConexao);
+atualizarStatusConexao();
+
+// ===== NOTIFICAÇÃO COM SOM =====
+
+function tocarSom() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800;
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (e) {
+    console.log("Erro ao tocar som:", e);
+  }
+}
+
+// ===== GERENCIAMENTO DE SENHAS =====
+
+async function atualizarSenha() {
+  try {
+    const snap = await db.collection("fila_juridica").limit(100).get();
+    let maior = 0;
+    snap.forEach((doc) => {
+      const n = Number(doc.data().senha || 0);
+      if (n > maior) maior = n;
+    });
+    proximaSenha = maior + 1;
+    document.getElementById("proximaSenha").innerText = proximaSenha;
+  } catch (e) {
+    console.log("Erro ao atualizar senha:", e);
+  }
+}
+
+window.gerarSenha = async function() {
+  const prefixo = document.getElementById("prefixo").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const tipo = document.getElementById("tipo").value;
+  const recado = document.getElementById("recado").value.trim();
+
+  if (!prefixo || !nome) {
+    alert("Preencha prefixo e nome!");
+    return;
+  }
+
+  const senhaAtual = proximaSenha;
+  proximaSenha++;
+  document.getElementById("proximaSenha").innerText = proximaSenha;
+
+  document.getElementById("prefixo").value = "";
+  document.getElementById("nome").value = "";
+  document.getElementById("tipo").value = "Cooperado";
+  document.getElementById("recado").value = "";
+
+  try {
+    await db.collection("fila_juridica").add({
+      senha: senhaAtual,
+      prefixo,
+      nome,
+      tipo,
+      recado,
+      status: "fila",
+      data: Date.now()
+    });
+  } catch (e) {
+    alert("Erro ao gerar senha. Verifique sua conexão.");
+    console.log(e);
+  }
+};
+
+window.atenderSenha = async function(id) {
+  try {
+    await db.collection("fila_juridica").doc(id).update({
+      status: "atendido"
+    });
+  } catch (e) {
+    console.log("Erro ao atender:", e);
+  }
+};
+
+window.excluirSenha = async function(id) {
+  if (confirm("Deseja excluir esta senha?")) {
+    try {
+      await db.collection("fila_juridica").doc(id).delete();
+    } catch (e) {
+      console.log("Erro ao excluir:", e);
+    }
+  }
+};
+
+window.zerarFila = async function() {
+  if (!confirm("Deseja zerar TODA a fila E o chat? Esta ação não pode ser desfeita!")) return;
+
+  try {
+    const snap = await db.collection("fila_juridica").get();
+    const promessas = [];
+
+    snap.forEach((doc) => {
+      promessas.push(db.collection("fila_juridica").doc(doc.id).delete());
+    });
+
+    const chatSnap = await db.collection("chat_juridico").get();
+    chatSnap.forEach((doc) => {
+      promessas.push(db.collection("chat_juridico").doc(doc.id).delete());
+    });
+
+    await Promise.all(promessas);
+    proximaSenha = 1;
+    document.getElementById("proximaSenha").innerText = 1;
+    alert("✅ Fila e chat foram zerados com sucesso!");
+  } catch (e) {
+    alert("Erro ao zerar fila. Tente novamente.");
+    console.log(e);
+  }
+};
+
+// ===== EXIBIÇÃO DA FILA (OTIMIZADA) =====
+
+db.collection("fila_juridica").orderBy("data")
+  .onSnapshot((snap) => {
+    const fila = document.getElementById("fila");
+    const atendidos = document.getElementById("atendidos");
+
+    fila.innerHTML = "";
+    atendidos.innerHTML = "";
+
+    snap.forEach((doc) => {
+      const d = doc.data();
+      const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+
+      const card = `
+        <div class="card ${d.status === 'atendido' ? 'card-atendido' : ''}">
+          <div class="topo">
+            <div class="senha">Nº ${d.senha}</div>
+            <div class="badge ${classe}">${d.tipo}</div>
+          </div>
+          <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
+          <div class="info"><b>Nome:</b> ${d.nome}</div>
+          ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
+          <div class="card-acoes">
+            ${d.status !== "atendido" ? `
+              <button class="btn-atender" onclick="atenderSenha('${doc.id}')">✅ Atendido</button>
+              <button class="btn-excluir" onclick="excluirSenha('${doc.id}')">❌ Excluir</button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      if (d.status === "atendido") {
+        atendidos.innerHTML += card;
+      } else {
+        fila.innerHTML += card;
+      }
+    });
+
+    atualizarSenha();
+  }, (error) => {
+    console.log("Erro ao carregar fila:", error);
+  });
+
+// ===== SISTEMA DE CHAT COM NOTIFICAÇÕES =====
+
+window.enviarMensagem = async function() {
+  const mensagem = document.getElementById("mensagem").value.trim();
+
+  if (!mensagem) return;
+
+  try {
+    await db.collection("chat_juridico").add({
+      remetente: "recepcao",
+      mensagem,
+      timestamp: Date.now(),
+      lido: true
+    });
+
+    document.getElementById("mensagem").value = "";
+  } catch (e) {
+    console.log("Erro ao enviar mensagem:", e);
+  }
+};
+
+window.mudarAba = function(aba) {
+  abaAtiva = aba;
+  
+  document.querySelectorAll(".chat-tab").forEach(tab => {
+    tab.classList.remove("ativo");
+  });
+  event.target.classList.add("ativo");
+
+  if (aba === "nao-lidas") {
+    todasAsMensagens.forEach((msg) => {
+      if (msg.remetente === "advogada" && !msg.lido) {
+        db.collection("chat_juridico").doc(msg.id).update({ lido: true }).catch(e => console.log(e));
+      }
+    });
+  }
+
+  atualizarChat();
+};
+
+function atualizarChat() {
+  const chatDiv = document.getElementById("chat");
+  chatDiv.innerHTML = "";
+
+  let mensagensParaMostrar = [];
+
+  if (abaAtiva === "nao-lidas") {
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.remetente === "advogada" && !msg.lido);
+  } else {
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.lido);
+  }
+
+  if (mensagensParaMostrar.length === 0) {
+    chatDiv.innerHTML = `<div class="vazio">${abaAtiva === "nao-lidas" ? "Sem mensagens não lidas" : "Sem mensagens lidas"}</div>`;
+    return;
+  }
+
+  mensagensParaMostrar.forEach((d) => {
+    const classe = d.remetente === "recepcao" ? "enviado" : "recebido";
+    const label = d.remetente === "recepcao" ? "Você" : "Advogada";
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `chat-message ${classe} ${d.lido ? 'lido' : ''}`;
+    msgDiv.innerHTML = `<strong>${label}:</strong> ${d.mensagem}`;
+    chatDiv.appendChild(msgDiv);
+  });
+
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+db.collection("chat_juridico").orderBy("timestamp")
+  .onSnapshot((snap) => {
+    todasAsMensagens = [];
+    let naoLidas = 0;
+
+    snap.forEach((doc) => {
+      const d = doc.data();
+      todasAsMensagens.push({ id: doc.id, ...d });
+
+      if (d.remetente === "advogada" && !d.lido) {
+        naoLidas++;
+      }
+    });
+
+    const badge = document.getElementById("badge-nao-lidas");
+    const aviso = document.getElementById("aviso-mensagem");
+
+    if (naoLidas > 0) {
+      badge.style.display = "inline-block";
+      badge.innerText = naoLidas;
+      aviso.innerHTML = `<div class="aviso-mensagem">🔔 ${naoLidas} mensagem${naoLidas > 1 ? 's' : ''} não lida${naoLidas > 1 ? 's' : ''} da advogada!</div>`;
+      
+      if (Date.now() - ultimaMensagemNotificada > 2000) {
+        tocarSom();
+        ultimaMensagemNotificada = Date.now();
+      }
+    } else {
+      badge.style.display = "none";
+      aviso.innerHTML = "";
+    }
+
+    atualizarChat();
+  }, (error) => {
+    console.log("Erro ao carregar chat:", error);
+  });
+
+atualizarSenha();
+
+</script>
+
+</body>
+</html>

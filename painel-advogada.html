@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
+  <title>Painel Advogada - CooperTaxi</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: white;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      color: #333;
+      margin: 0;
+    }
+
+    .status-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .status-icon {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #51cf66;
+    }
+
+    .status-icon.offline {
+      background: #ff6b6b;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      grid-template-rows: 1fr auto;
+      flex: 1;
+      gap: 12px;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+    }
+
+    .box {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .box-titulo {
+      padding: 15px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #667eea;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .box-titulo-pequeno {
+      padding: 12px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #667eea;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .notificacao-badge {
+      display: inline-block;
+      background: #ff6b6b;
+      color: white;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+      animation: pulse 0.6s infinite;
+    }
+
+    .fila-box {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .atendidos-box {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .chat-box {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      min-height: 280px;
+    }
+
+    .fila-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .fila-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .fila-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .fila-container::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+
+    .atendidos-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .atendidos-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .atendidos-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .atendidos-container::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 2px;
+    }
+
+    .card {
+      background: #f8f9fa;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 5px solid #667eea;
+      transition: all 0.2s;
+    }
+
+    .card:active {
+      transform: scale(0.98);
+    }
+
+    .card-atendido {
+      background: #f0f9f6;
+      border-left-color: #51cf66;
+      padding: 8px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .card-topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-topo-pequeno {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .senha {
+      font-size: 26px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .senha-pequena {
+      font-size: 16px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 16px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .badge-pequeno {
+      padding: 4px 8px;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      font-size: 10px;
+    }
+
+    .cooperado {
+      background: #d4a017;
+    }
+
+    .auxiliar {
+      background: #1565c0;
+    }
+
+    .info {
+      font-size: 14px;
+      color: #555;
+      margin: 6px 0;
+      font-weight: 500;
+    }
+
+    .info-pequena {
+      font-size: 11px;
+      color: #555;
+      margin: 3px 0;
+      font-weight: 500;
+    }
+
+    .msg {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 8px 0;
+      border-left: 3px solid #667eea;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .btn-atender {
+      width: 100%;
+      background: #51cf66;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-atender:active {
+      background: #40c057;
+      transform: scale(0.95);
+    }
+
+    .vazio {
+      text-align: center;
+      color: #999;
+      padding: 30px 15px;
+      font-style: italic;
+      font-size: 15px;
+    }
+
+    .vazio-pequeno {
+      text-align: center;
+      color: #999;
+      padding: 15px 10px;
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .chat-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .chat-tab {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .chat-tab.ativo {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+
+    .chat-message {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      word-wrap: break-word;
+      max-width: 85%;
+      line-height: 1.4;
+    }
+
+    .chat-message.enviado {
+      background: #667eea;
+      color: white;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    .chat-message.recebido {
+      background: #e9ecef;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .chat-input-group input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-enviar {
+      padding: 12px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-enviar:active {
+      background: #5568d3;
+      transform: scale(0.95);
+    }
+
+    .aviso-mensagem {
+      background: #fff3bf;
+      border: 2px solid #ffc107;
+      color: #856404;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 13px;
+      animation: pulse 0.6s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+      }
+
+      .fila-box {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .atendidos-box {
+        grid-column: 1;
+        grid-row: 2;
+        max-height: 150px;
+      }
+
+      .chat-box {
+        grid-column: 1;
+        grid-row: 3;
+        min-height: 300px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 12px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .container {
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .box-titulo {
+        padding: 12px;
+        font-size: 16px;
+      }
+
+      .chat-container {
+        padding: 10px;
+        gap: 8px;
+      }
+
+      .chat-message {
+        font-size: 13px;
+      }
+
+      .chat-input-group input {
+        font-size: 13px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>👩‍⚖️ Painel Advogada</h1>
+  <div class="status-info">
+    <span class="status-icon" id="status-icon"></span>
+    <span id="status-texto">Online</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- FILA DE ESPERA -->
+  <div class="box fila-box">
+    <div class="box-titulo">
+      📋 Fila de Espera
+      <span id="badge-fila" class="notificacao-badge" style="display:none;">0</span>
+    </div>
+    <div id="fila" class="fila-container"></div>
+  </div>
+
+  <!-- ATENDIDOS (CANTINHO) -->
+  <div class="box atendidos-box">
+    <div class="box-titulo-pequeno">
+      ✅ Atendidos
+    </div>
+    <div id="atendidos" class="atendidos-container"></div>
+  </div>
+
+  <!-- CHAT GRANDE -->
+  <div class="box chat-box">
+    <div class="box-titulo">
+      💬 Chat com Recepção
+      <span id="badge-chat" class="notificacao-badge" style="display:none;">0</span>
+    </div>
+    <div class="chat-container">
+      <div id="aviso-mensagem"></div>
+      <div class="chat-tabs">
+        <div class="chat-tab ativo" onclick="mudarAba('nao-lidas')">📨 Não Lidas</div>
+        <div class="chat-tab" onclick="mudarAba('lidas')">✅ Lidas</div>
+      </div>
+      <div id="chat" class="chat-messages"></div>
+      <div class="chat-input-group">
+        <input id="mensagem" placeholder="Digite sua resposta..." onkeypress="if(event.key==='Enter') enviarMensagem()">
+        <button class="btn-enviar" onclick="enviarMensagem()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC58wsopM1NySU4EZclGuwhgzVUeVf4B_k",
+  authDomain: "senha-36ecb.firebaseapp.com",
+  projectId: "senha-36ecb",
+  storageBucket: "senha-36ecb.firebasestorage.app",
+  messagingSenderId: "512666147464",
+  appId: "1:512666147464:web:8b040b147f27314ffa5d3d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let abaAtiva = "nao-lidas";
+let todasAsMensagens = [];
+let ultimaMensagemNotificada = 0;
+let ultimaFilaLength = 0;
+
+// ===== DETECÇÃO DE CONEXÃO =====
+
+function atualizarStatusConexao() {
+  const statusIcon = document.getElementById("status-icon");
+  const statusTexto = document.getElementById("status-texto");
+
+  if (navigator.onLine) {
+    statusIcon.classList.remove("offline");
+    statusTexto.innerText = "Online";
+  } else {
+    statusIcon.classList.add("offline");
+    statusTexto.innerText = "Offline";
+  }
+}
+
+window.addEventListener("online", atualizarStatusConexao);
+window.addEventListener("offline", atualizarStatusConexao);
+atualizarStatusConexao();
+
+// ===== NOTIFICAÇÃO COM SOM =====
+
+function tocarSom() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800;
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (e) {
+    console.log("Erro ao tocar som:", e);
+  }
+}
+
+// ===== VIBRAÇÃO NO CELULAR =====
+
+function vibrar() {
+  if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]);
+  }
+}
+
+// ===== EXIBIÇÃO DA FILA =====
+
+db.collection("fila_juridica").orderBy("data")
+  .onSnapshot((snap) => {
+    const fila = document.getElementById("fila");
+    const atendidos = document.getElementById("atendidos");
+    const badgeFila = document.getElementById("badge-fila");
+
+    fila.innerHTML = "";
+    atendidos.innerHTML = "";
+
+    const filaAtiva = [];
+    const atendidosList = [];
+
+    snap.forEach((doc) => {
+      const d = doc.data();
+      if (d.status !== "atendido") {
+        filaAtiva.push({ id: doc.id, ...d });
+      } else {
+        atendidosList.push({ id: doc.id, ...d });
+      }
+    });
+
+    // Notificação de nova senha
+    if (filaAtiva.length > ultimaFilaLength) {
+      tocarSom();
+      vibrar();
+      ultimaFilaLength = filaAtiva.length;
+    } else if (filaAtiva.length < ultimaFilaLength) {
+      ultimaFilaLength = filaAtiva.length;
+    }
+
+    // FILA DE ESPERA
+    if (filaAtiva.length === 0) {
+      fila.innerHTML = '<div class="vazio">✅ Nenhuma senha na fila</div>';
+      badgeFila.style.display = "none";
+    } else {
+      badgeFila.style.display = "inline-block";
+      badgeFila.innerText = filaAtiva.length;
+
+      filaAtiva.forEach((d) => {
+        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+
+        const card = `
+          <div class="card">
+            <div class="card-topo">
+              <div class="senha">Nº ${d.senha}</div>
+              <div class="badge ${classe}">${d.tipo}</div>
+            </div>
+            <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
+            <div class="info"><b>Nome:</b> ${d.nome}</div>
+            ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
+            <button class="btn-atender" onclick="atenderSenha('${d.id}')">✅ Atendido</button>
+          </div>
+        `;
+
+        fila.innerHTML += card;
+      });
+    }
+
+    // ATENDIDOS (CANTINHO)
+    if (atendidosList.length === 0) {
+      atendidos.innerHTML = '<div class="vazio-pequeno">Nenhum atendido</div>';
+    } else {
+      atendidosList.forEach((d) => {
+        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+
+        const card = `
+          <div class="card card-atendido">
+            <div class="card-topo-pequeno">
+              <div class="senha-pequena">Nº ${d.senha}</div>
+              <div class="badge-pequeno ${classe}">${d.tipo}</div>
+            </div>
+            <div class="info-pequena"><b>Prefixo:</b> ${d.prefixo}</div>
+            <div class="info-pequena"><b>Nome:</b> ${d.nome}</div>
+          </div>
+        `;
+
+        atendidos.innerHTML += card;
+      });
+    }
+  }, (error) => {
+    console.log("Erro ao carregar fila:", error);
+  });
+
+window.atenderSenha = async function(id) {
+  try {
+    await db.collection("fila_juridica").doc(id).update({
+      status: "atendido"
+    });
+  } catch (e) {
+    console.log("Erro ao atender:", e);
+  }
+};
+
+// ===== SISTEMA DE CHAT =====
+
+window.enviarMensagem = async function() {
+  const mensagem = document.getElementById("mensagem").value.trim();
+
+  if (!mensagem) return;
+
+  try {
+    await db.collection("chat_juridico").add({
+      remetente: "advogada",
+      mensagem,
+      timestamp: Date.now(),
+      lido: true
+    });
+
+    document.getElementById("mensagem").value = "";
+  } catch (e) {
+    console.log("Erro ao enviar mensagem:", e);
+  }
+};
+
+window.mudarAba = function(aba) {
+  abaAtiva = aba;
+  
+  document.querySelectorAll(".chat-tab").forEach(tab => {
+    tab.classList.remove("ativo");
+  });
+  event.target.classList.add("ativo");
+
+  if (aba === "nao-lidas") {
+    todasAsMensagens.forEach((msg) => {
+      if (msg.remetente === "recepcao" && !msg.lido) {
+        db.collection("chat_juridico").doc(msg.id).update({ lido: true }).catch(e => console.log(e));
+      }
+    });
+  }
+
+  atualizarChat();
+};
+
+function atualizarChat() {
+  const chatDiv = document.getElementById("chat");
+  chatDiv.innerHTML = "";
+
+  let mensagensParaMostrar = [];
+
+  if (abaAtiva === "nao-lidas") {
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.remetente === "recepcao" && !msg.lido);
+  } else {
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.lido);
+  }
+
+  if (mensagensParaMostrar.length === 0) {
+    chatDiv.innerHTML = `<div class="vazio">${abaAtiva === "nao-lidas" ? "Sem mensagens não lidas" : "Sem mensagens lidas"}</div>`;
+    return;
+  }
+
+  mensagensParaMostrar.forEach((d) => {
+    const classe = d.remetente === "advogada" ? "enviado" : "recebido";
+    const label = d.remetente === "advogada" ? "Você" : "Recepção";
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `chat-message ${classe}`;
+    msgDiv.innerHTML = `<strong>${label}:</strong> ${d.mensagem}`;
+    chatDiv.appendChild(msgDiv);
+  });
+
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+db.collection("chat_juridico").orderBy("timestamp")
+  .onSnapshot((snap) => {
+    todasAsMensagens = [];
+    let naoLidas = 0;
+
+    snap.forEach((doc) => {
+      const d = doc.data();
+      todasAsMensagens.push({ id: doc.id, ...d });
+
+      if (d.remetente === "recepcao" && !d.lido) {
+        naoLidas++;
+      }
+    });
+
+    const badgeChat = document.getElementById("badge-chat");
+    const aviso = document.getElementById("aviso-mensagem");
+
+    if (naoLidas > 0) {
+      badgeChat.style.display = "inline-block";
+      badgeChat.innerText = naoLidas;
+      aviso.innerHTML = `<div class="aviso-mensagem">🔔 ${naoLidas} mensagem${naoLidas > 1 ? 's' : ''} não lida${naoLidas > 1 ? 's' : ''}</div>`;
+      
+      if (Date.now() - ultimaMensagemNotificada > 2000) {
+        tocarSom();
+        vibrar();
+        ultimaMensagemNotificada = Date.now();
+      }
+    } else {
+      badgeChat.style.display = "none";
+      aviso.innerHTML = "";
+    }
+
+    atualizarChat();
+  }, (error) => {
+    console.log("Erro ao carregar chat:", error);
+  });
+
+</script>
+
+</body>
+</html>
