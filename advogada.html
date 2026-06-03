@@ -72,12 +72,31 @@
       overflow: hidden;
     }
 
-    @media (max-width: 768px) {
-      .container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr auto;
-      }
+   @media (max-width: 768px) {
+
+    .container {
+        grid-template-columns: 3fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 8px;
     }
+
+    .fila-box {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .atendidos-box {
+        grid-column: 2;
+        grid-row: 1;
+        max-height: 250px;
+    }
+
+    .chat-box {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        min-height: 120px;
+    }
+}
 
     .box {
       background: white;
