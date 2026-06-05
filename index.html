@@ -1,3 +1,55 @@
+
+
+Atualizar
+
+Compartilhar
+pode deixar a fila de espera maior, o cht pequeno embaixo. deixa a fila pra ver quantas pessos tem na espera e no atendidos quantos foram atendidos. 
+Lite
+Perfeito! Vou fazer esse ajuste agora mesmo. Vou aumentar o destaque para a Fila de Espera e para o contador de pessoas, deixando o Chat mais compacto na parte inferior para priorizar a visualização de quem está aguardando.
+
+
+Lite
+Fiz as atualizações solicitadas no Painel da Advogada:
+Fila de Espera Priorizada: Aumentei a área da fila de espera no celular para que você consiga ver mais pessoas de uma vez.
+Contadores em Destaque: Adicionei contadores grandes ao lado dos títulos "Fila de Espera" e "Atendidos". Agora você consegue ver instantaneamente quantas pessoas estão aguardando e quantas já foram atendidas.
+Chat Compacto: O chat foi movido para a parte inferior e ficou mais discreto, focando apenas nas mensagens recentes para não atrapalhar a visão da fila.
+O arquivo atualizado está disponível abaixo para download.
+painel-advogada.html
+Código · 19.81 KB
+Ver todos os arquivos nesta tarefa
+Como foi este resultado?
+consegue deixar a tela da recepçao jurido com o lyout igual?
+Lite
+Com certeza! Vou ajustar o layout do painel da Recepção Jurídica para que ele fique idêntico ao da Advogada no celular: Fila e Atendidos lado a lado no topo com contadores em destaque, e o Chat compacto na parte inferior.
+
+
+Lite
+Pronto! Agora ambos os painéis estão com o mesmo padrão de layout e funcionalidades:
+Layout Identico no Celular: O painel da Recepção agora segue o mesmo modelo da Advogada, com a Fila de Espera em destaque, Atendidos ao lado e o Chat compacto na parte inferior.
+Contadores em Tempo Real: Adicionei os contadores de "Fila de Espera" e "Atendidos" também na Recepção, para que ambos os lados tenham a mesma visão da quantidade de pessoas.
+Chat Sincronizado: O chat de ambos os lados agora é compacto no celular, priorizando a gestão das senhas.
+Você pode baixar os dois arquivos atualizados abaixo para garantir que tudo esteja perfeitamente sincronizado.
+recepcao-juridica.html
+Código · 22.96 KB
+painel-advogada.html
+Código · 19.81 KB
+Ver todos os arquivos nesta tarefa
+Tarefa concluída
+Como foi este resultado?
+Sugestões de acompanhamento
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recepção Jurídica - CooperTaxi</title>
+  <style>
+
+
+
+
+
+recepcao-juridica.html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -27,31 +79,147 @@
     }
 
     @media (max-width: 1200px) {
-    .container {
+      .container {
         grid-template-columns: 1fr;
+      }
     }
 
-    .fila-container {
-        min-height: 450px !important;
-        max-height: 600px !important;
-    }
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr 100px;
+        gap: 6px;
+      }
 
-    .chat-container {
-        max-height: 250px !important;
-    }
-}
-    .container {
-        grid-template-columns: 1fr;
-    }
+      .coluna-esquerda {
+        grid-column: 2;
+        gap: 8px;
+      }
 
-    .fila-espera {
-        min-height: 70vh !important;
-    }
+      .coluna-direita {
+        grid-column: 1;
+        gap: 8px;
+      }
 
-    .chat-container {
-        min-height: 20vh !important;
-    }
-}
+      .box {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 16px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+
+      h1 .contador {
+        font-size: 20px;
+        min-width: 35px;
+      }
+
+      h2 {
+        font-size: 14px;
+        margin: 0 0 10px 0;
+      }
+
+      h2 .contador {
+        font-size: 16px;
+        min-width: 25px;
+      }
+
+      .numero-senha {
+        font-size: 36px;
+        padding: 15px;
+        margin: 10px 0;
+      }
+
+      .botoes-grupo {
+        gap: 6px;
+      }
+
+      .botoes-grupo button {
+        padding: 10px;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .fila-container {
+        max-height: 300px;
+      }
+
+      .atendidos-container {
+        max-height: none;
+      }
+
+      .chat-container {
+        height: 100px;
+      }
+
+      .chat-tabs {
+        display: none;
+      }
+
+      .chat-messages {
+        max-height: 60px;
+        font-size: 12px;
+        padding: 8px;
+        margin-bottom: 6px;
+      }
+
+      .chat-input-group {
+        gap: 4px;
+      }
+
+      .chat-input-group input {
+        font-size: 12px;
+        padding: 8px;
+        margin: 0;
+      }
+
+      .btn-enviar {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .card {
+        padding: 10px;
+        margin: 8px 0;
+      }
+
+      .topo {
+        margin-bottom: 8px;
+      }
+
+      .senha {
+        font-size: 20px;
+      }
+
+      .info {
+        font-size: 13px;
+        margin: 4px 0;
+      }
+
+      .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      input, select, textarea {
+        padding: 10px;
+        font-size: 14px;
+        margin: 8px 0;
+      }
+
+      textarea {
+        min-height: 60px;
+      }
+
+      .status-info {
+        font-size: 11px;
+        padding: 6px;
+        margin-top: 8px;
       }
     }
 
@@ -88,6 +256,26 @@
       margin: 20px 0 15px 0;
       font-size: 20px;
       font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .contador {
+      font-size: 18px;
+      color: #51cf66;
+      font-weight: bold;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    h1 .contador {
+      font-size: 24px;
+      color: #667eea;
+      font-weight: bold;
+      min-width: 40px;
+      text-align: right;
     }
 
     input, select, textarea {
@@ -109,7 +297,7 @@
 
     textarea {
       resize: vertical;
-      min-height: 100px;
+      min-height: 80px;
     }
 
     button {
@@ -244,12 +432,10 @@
     }
 
     .fila-container {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 8px;
-    min-height: 450px;
-    max-height: 700px;
-}
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+      max-height: 600px;
     }
 
     .fila-container::-webkit-scrollbar {
@@ -296,7 +482,7 @@
     .chat-container {
       display: flex;
       flex-direction: column;
-      height: 220px;
+      height: 250px;
     }
 
     .chat-tabs {
@@ -424,17 +610,14 @@
       margin: 0;
     }
 
-    ..box-fila-principal {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 80vh;
-}
+    .box-fila-principal {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
-    ..box-chat-pequeno {
-    height: 180px;
-}
+    .box-chat-pequeno {
+      height: auto;
     }
 
     .notificacao-badge {
@@ -503,6 +686,14 @@
       padding: 15px;
       font-style: italic;
     }
+
+    .vazio-pequeno {
+      text-align: center;
+      color: #999;
+      padding: 10px;
+      font-style: italic;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -512,7 +703,7 @@
   <!-- COLUNA ESQUERDA: GERAÇÃO DE SENHAS -->
   <div class="coluna-esquerda">
     <div class="box">
-      <h1>🎫 Gerar Senha</h1>
+      <h1><span>🎫 Gerar Senha</span></h1>
 
       <div class="numero-senha">
         Nº <span id="proximaSenha">1</span>
@@ -526,7 +717,7 @@
         <option>Auxiliar</option>
       </select>
 
-      <textarea id="recado" placeholder="Observações ou recado"></textarea>
+      <textarea id="recado" placeholder="Recado / Observação"></textarea>
 
       <div class="botoes-grupo">
         <button class="btn-gerar" onclick="gerarSenha()">✅ GERAR</button>
@@ -541,7 +732,7 @@
 
     <!-- ATENDIDOS PEQUENO -->
     <div class="box">
-      <h2>✅ Atendidos</h2>
+      <h2><span>✅ Atendidos</span><span id="contador-atendidos" class="contador">0</span></h2>
       <div id="atendidos" class="atendidos-container"></div>
     </div>
   </div>
@@ -550,18 +741,18 @@
   <div class="coluna-direita">
     <!-- FILA PRINCIPAL EM DESTAQUE -->
     <div class="box box-fila-principal">
-      <h1>📋 Fila de Espera</h1>
+      <h1><span>📋 Fila de Espera</span><span id="contador-fila" class="contador">0</span></h1>
       <div id="fila" class="fila-container"></div>
     </div>
 
     <!-- CHAT PEQUENO EMBAIXO -->
     <div class="box box-chat-pequeno">
-      <h2>💬 Chat com Advogada <span id="badge-nao-lidas" class="notificacao-badge" style="display:none;">0</span></h2>
+      <h2><span>💬 Chat com Advogada</span><span id="badge-nao-lidas" class="notificacao-badge" style="display:none;">0</span></h2>
       <div id="aviso-mensagem"></div>
       <div class="chat-container">
         <div class="chat-tabs">
-          <div class="chat-tab ativo" onclick="mudarAba('nao-lidas')">📨 Não Lidas</div>
-          <div class="chat-tab" onclick="mudarAba('lidas')">✅ Lidas</div>
+          <div class="chat-tab ativo" onclick="mudarAba('nao-lidas', this)">📨 Não Lidas</div>
+          <div class="chat-tab" onclick="mudarAba('lidas', this)">✅ Lidas</div>
         </div>
         <div id="chat" class="chat-messages"></div>
         <div class="chat-input-group">
@@ -744,9 +935,14 @@ db.collection("fila_juridica").orderBy("data")
   .onSnapshot((snap) => {
     const fila = document.getElementById("fila");
     const atendidos = document.getElementById("atendidos");
+    const contadorFila = document.getElementById("contador-fila");
+    const contadorAtendidos = document.getElementById("contador-atendidos");
 
     fila.innerHTML = "";
     atendidos.innerHTML = "";
+
+    let filaCount = 0;
+    let atendidosCount = 0;
 
     snap.forEach((doc) => {
       const d = doc.data();
@@ -772,10 +968,15 @@ db.collection("fila_juridica").orderBy("data")
 
       if (d.status === "atendido") {
         atendidos.innerHTML += card;
+        atendidosCount++;
       } else {
         fila.innerHTML += card;
+        filaCount++;
       }
     });
+
+    contadorFila.innerText = filaCount;
+    contadorAtendidos.innerText = atendidosCount;
 
     atualizarSenha();
   }, (error) => {
@@ -794,7 +995,7 @@ window.enviarMensagem = async function() {
       remetente: "recepcao",
       mensagem,
       timestamp: Date.now(),
-      lido: true
+      lido: false
     });
 
     document.getElementById("mensagem").value = "";
@@ -803,13 +1004,13 @@ window.enviarMensagem = async function() {
   }
 };
 
-window.mudarAba = function(aba) {
+window.mudarAba = function(aba, el) {
   abaAtiva = aba;
   
   document.querySelectorAll(".chat-tab").forEach(tab => {
     tab.classList.remove("ativo");
   });
-  event.target.classList.add("ativo");
+  if (el) el.classList.add("ativo");
 
   if (aba === "nao-lidas") {
     todasAsMensagens.forEach((msg) => {
@@ -831,7 +1032,7 @@ function atualizarChat() {
   if (abaAtiva === "nao-lidas") {
     mensagensParaMostrar = todasAsMensagens.filter(msg => msg.remetente === "advogada" && !msg.lido);
   } else {
-    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.lido);
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.lido || (msg.remetente === "recepcao" && !msg.lido));
   }
 
   if (mensagensParaMostrar.length === 0) {
