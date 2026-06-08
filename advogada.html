@@ -34,12 +34,20 @@
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .header h1 {
       font-size: 22px;
       color: #333;
       margin: 0;
+    }
+
+    .header-direita {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
     .status-info {
@@ -60,6 +68,26 @@
 
     .status-icon.offline {
       background: #ff6b6b;
+    }
+
+    .btn-relatorio {
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .btn-relatorio:hover {
+      background: #5568d3;
+    }
+
+    .btn-relatorio:active {
+      transform: scale(0.95);
     }
 
     .container {
@@ -99,15 +127,6 @@
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
-      gap: 10px;
-    }
-
-    .box-titulo .contador {
-      font-size: 24px;
-      color: #667eea;
-      font-weight: bold;
-      min-width: 40px;
-      text-align: right;
     }
 
     .box-titulo-pequeno {
@@ -121,15 +140,6 @@
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
-      gap: 8px;
-    }
-
-    .box-titulo-pequeno .contador {
-      font-size: 18px;
-      color: #51cf66;
-      font-weight: bold;
-      min-width: 30px;
-      text-align: right;
     }
 
     .notificacao-badge {
@@ -464,6 +474,92 @@
       flex-shrink: 0;
     }
 
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.ativo {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-titulo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .modal-opcoes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .modal-btn {
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-word {
+      background: #2b5797;
+      color: white;
+    }
+
+    .modal-btn-pdf {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .modal-btn-email {
+      background: #1976d2;
+      color: white;
+    }
+
+    .modal-btn-whatsapp {
+      background: #25d366;
+      color: white;
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-btn:active {
+      transform: translateY(0);
+    }
+
+    .modal-fechar {
+      background: #f0f0f0;
+      color: #333;
+      width: 100%;
+      margin-top: 15px;
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
@@ -471,59 +567,25 @@
 
     @media (max-width: 768px) {
       .container {
-        grid-template-columns: 1fr 100px;
-        grid-template-rows: 1fr auto;
-        gap: 6px;
-        padding: 6px;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
       }
 
       .fila-box {
         grid-column: 1;
         grid-row: 1;
-        min-height: 300px;
       }
 
       .atendidos-box {
-        grid-column: 2;
-        grid-row: 1;
-        min-height: 300px;
-      }
-
-      .atendidos-container {
-        max-height: none;
+        grid-column: 1;
+        grid-row: 2;
+        max-height: 150px;
       }
 
       .chat-box {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        min-height: 120px;
-      }
-
-      .chat-container {
-        height: 100px;
-      }
-
-      .chat-tabs {
-        display: none;
-      }
-
-      .chat-messages {
-        max-height: 60px;
-        font-size: 12px;
-      }
-
-      .chat-input-group {
-        gap: 4px;
-      }
-
-      .chat-input-group input {
-        font-size: 12px;
-        padding: 8px;
-      }
-
-      .btn-enviar {
-        padding: 8px 12px;
-        font-size: 12px;
+        grid-column: 1;
+        grid-row: 3;
+        min-height: 300px;
       }
     }
 
@@ -559,6 +621,14 @@
         font-size: 13px;
         padding: 10px;
       }
+
+      .modal-content {
+        padding: 20px;
+      }
+
+      .modal-opcoes {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -566,9 +636,12 @@
 
 <div class="header">
   <h1>👩‍⚖️ Painel Advogada</h1>
-  <div class="status-info">
-    <span class="status-icon" id="status-icon"></span>
-    <span id="status-texto">Online</span>
+  <div class="header-direita">
+    <button class="btn-relatorio" onclick="abrirModalRelatorio()">📊 Relatório</button>
+    <div class="status-info">
+      <span class="status-icon" id="status-icon"></span>
+      <span id="status-texto">Online</span>
+    </div>
   </div>
 </div>
 
@@ -577,8 +650,8 @@
   <!-- FILA DE ESPERA -->
   <div class="box fila-box">
     <div class="box-titulo">
-      <span>📋 Fila de Espera</span>
-      <span id="contador-fila" class="contador">0</span>
+      📋 Fila de Espera
+      <span id="badge-fila" class="notificacao-badge" style="display:none;">0</span>
     </div>
     <div id="fila" class="fila-container"></div>
   </div>
@@ -586,8 +659,7 @@
   <!-- ATENDIDOS (CANTINHO) -->
   <div class="box atendidos-box">
     <div class="box-titulo-pequeno">
-      <span>✅ Atendidos</span>
-      <span id="contador-atendidos" class="contador">0</span>
+      ✅ Atendidos
     </div>
     <div id="atendidos" class="atendidos-container"></div>
   </div>
@@ -601,8 +673,8 @@
     <div class="chat-container">
       <div id="aviso-mensagem"></div>
       <div class="chat-tabs">
-        <div class="chat-tab ativo" onclick="mudarAba('nao-lidas', this)">📨 Não Lidas</div>
-        <div class="chat-tab" onclick="mudarAba('lidas', this)">✅ Lidas</div>
+        <div class="chat-tab ativo" onclick="mudarAba('nao-lidas')">📨 Não Lidas</div>
+        <div class="chat-tab" onclick="mudarAba('todas')">💬 Todas</div>
       </div>
       <div id="chat" class="chat-messages"></div>
       <div class="chat-input-group">
@@ -612,6 +684,20 @@
     </div>
   </div>
 
+</div>
+
+<!-- MODAL DE RELATÓRIO -->
+<div id="modalRelatorio" class="modal">
+  <div class="modal-content">
+    <div class="modal-titulo">📊 Gerar Relatório Diário</div>
+    <div class="modal-opcoes">
+      <button class="modal-btn modal-btn-word" onclick="gerarRelatorioWord()">📄 Word</button>
+      <button class="modal-btn modal-btn-pdf" onclick="gerarRelatorioPDF()">📕 PDF</button>
+      <button class="modal-btn modal-btn-email" onclick="gerarRelatorioEmail()">📧 Email</button>
+      <button class="modal-btn modal-btn-whatsapp" onclick="gerarRelatorioWhatsApp()">💬 WhatsApp</button>
+    </div>
+    <button class="modal-btn modal-fechar" onclick="fecharModalRelatorio()">Cancelar</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -635,6 +721,8 @@ let abaAtiva = "nao-lidas";
 let todasAsMensagens = [];
 let ultimaMensagemNotificada = 0;
 let ultimaFilaLength = 0;
+let filaAtualizada = [];
+let atendidosAtualizados = [];
 
 // ===== DETECÇÃO DE CONEXÃO =====
 
@@ -678,219 +766,5 @@ function tocarSom() {
     console.log("Erro ao tocar som:", e);
   }
 }
-
-// ===== VIBRAÇÃO NO CELULAR =====
-
-function vibrar() {
-  if (navigator.vibrate) {
-    navigator.vibrate([200, 100, 200]);
-  }
-}
-
-// ===== EXIBIÇÃO DA FILA =====
-
-db.collection("fila_juridica").orderBy("data")
-  .onSnapshot((snap) => {
-    const fila = document.getElementById("fila");
-    const atendidos = document.getElementById("atendidos");
-    const contadorFila = document.getElementById("contador-fila");
-    const contadorAtendidos = document.getElementById("contador-atendidos");
-
-    fila.innerHTML = "";
-    atendidos.innerHTML = "";
-
-    const filaAtiva = [];
-    const atendidosList = [];
-
-    snap.forEach((doc) => {
-      const d = doc.data();
-      if (d.status !== "atendido") {
-        filaAtiva.push({ id: doc.id, ...d });
-      } else {
-        atendidosList.push({ id: doc.id, ...d });
-      }
-    });
-
-    // Atualizar contadores
-    contadorFila.innerText = filaAtiva.length;
-    contadorAtendidos.innerText = atendidosList.length;
-
-    // Notificação de nova senha
-    if (filaAtiva.length > ultimaFilaLength) {
-      tocarSom();
-      vibrar();
-      ultimaFilaLength = filaAtiva.length;
-    } else if (filaAtiva.length < ultimaFilaLength) {
-      ultimaFilaLength = filaAtiva.length;
-    }
-
-    // FILA DE ESPERA
-    if (filaAtiva.length === 0) {
-      fila.innerHTML = '<div class="vazio">✅ Nenhuma senha na fila</div>';
-    } else {
-      filaAtiva.forEach((d) => {
-        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
-
-        const card = `
-          <div class="card">
-            <div class="card-topo">
-              <div class="senha">Nº ${d.senha}</div>
-              <div class="badge ${classe}">${d.tipo}</div>
-            </div>
-            <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
-            <div class="info"><b>Nome:</b> ${d.nome}</div>
-            ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
-            <button class="btn-atender" onclick="atenderSenha('${d.id}')">✅ Atendido</button>
-          </div>
-        `;
-
-        fila.innerHTML += card;
-      });
-    }
-
-    // ATENDIDOS (CANTINHO)
-    if (atendidosList.length === 0) {
-      atendidos.innerHTML = '<div class="vazio-pequeno">Nenhum atendido</div>';
-    } else {
-      atendidosList.forEach((d) => {
-        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
-
-        const card = `
-          <div class="card card-atendido">
-            <div class="card-topo-pequeno">
-              <div class="senha-pequena">Nº ${d.senha}</div>
-              <div class="badge-pequeno ${classe}">${d.tipo}</div>
-            </div>
-            <div class="info-pequena"><b>Prefixo:</b> ${d.prefixo}</div>
-            <div class="info-pequena"><b>Nome:</b> ${d.nome}</div>
-          </div>
-        `;
-
-        atendidos.innerHTML += card;
-      });
-    }
-  }, (error) => {
-    console.log("Erro ao carregar fila:", error);
-  });
-
-window.atenderSenha = async function(id) {
-  try {
-    await db.collection("fila_juridica").doc(id).update({
-      status: "atendido"
-    });
-  } catch (e) {
-    console.log("Erro ao atender:", e);
-  }
-};
-
-// ===== SISTEMA DE CHAT =====
-
-window.enviarMensagem = async function() {
-  const mensagem = document.getElementById("mensagem").value.trim();
-
-  if (!mensagem) return;
-
-  try {
-    await db.collection("chat_juridico").add({
-      remetente: "advogada",
-      mensagem,
-      timestamp: Date.now(),
-      lido: false
-    });
-
-    document.getElementById("mensagem").value = "";
-  } catch (e) {
-    console.log("Erro ao enviar mensagem:", e);
-  }
-};
-
-window.mudarAba = function(aba, el) {
-  abaAtiva = aba;
-  
-  document.querySelectorAll(".chat-tab").forEach(tab => {
-    tab.classList.remove("ativo");
-  });
-  if (el) el.classList.add("ativo");
-
-  if (aba === "nao-lidas") {
-    todasAsMensagens.forEach((msg) => {
-      if (msg.remetente === "recepcao" && !msg.lido) {
-        db.collection("chat_juridico").doc(msg.id).update({ lido: true }).catch(e => console.log(e));
-      }
-    });
-  }
-
-  atualizarChat();
-};
-
-function atualizarChat() {
-  const chatDiv = document.getElementById("chat");
-  chatDiv.innerHTML = "";
-
-  let mensagensParaMostrar = [];
-
-  if (abaAtiva === "nao-lidas") {
-    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.remetente === "recepcao" && !msg.lido);
-  } else {
-    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.lido || (msg.remetente === "advogada" && !msg.lido));
-  }
-
-  if (mensagensParaMostrar.length === 0) {
-    chatDiv.innerHTML = `<div class="vazio">${abaAtiva === "nao-lidas" ? "Sem mensagens não lidas" : "Sem mensagens lidas"}</div>`;
-    return;
-  }
-
-  mensagensParaMostrar.forEach((d) => {
-    const classe = d.remetente === "advogada" ? "enviado" : "recebido";
-    const label = d.remetente === "advogada" ? "Você" : "Recepção";
-
-    const msgDiv = document.createElement("div");
-    msgDiv.className = `chat-message ${classe}`;
-    msgDiv.innerHTML = `<strong>${label}:</strong> ${d.mensagem}`;
-    chatDiv.appendChild(msgDiv);
-  });
-
-  chatDiv.scrollTop = chatDiv.scrollHeight;
-}
-
-db.collection("chat_juridico").orderBy("timestamp")
-  .onSnapshot((snap) => {
-    todasAsMensagens = [];
-    let naoLidas = 0;
-
-    snap.forEach((doc) => {
-      const d = doc.data();
-      todasAsMensagens.push({ id: doc.id, ...d });
-
-      if (d.remetente === "recepcao" && !d.lido) {
-        naoLidas++;
-      }
-    });
-
-    const badgeChat = document.getElementById("badge-chat");
-    const aviso = document.getElementById("aviso-mensagem");
-
-    if (naoLidas > 0) {
-      badgeChat.style.display = "inline-block";
-      badgeChat.innerText = naoLidas;
-      aviso.innerHTML = `<div class="aviso-mensagem">🔔 ${naoLidas} mensagem${naoLidas > 1 ? 's' : ''} não lida${naoLidas > 1 ? 's' : ''}</div>`;
-      
-      if (Date.now() - ultimaMensagemNotificada > 2000) {
-        tocarSom();
-        vibrar();
-        ultimaMensagemNotificada = Date.now();
-      }
-    } else {
-      badgeChat.style.display = "none";
-      aviso.innerHTML = "";
-    }
-
-    atualizarChat();
-  }, (error) => {
-    console.log("Erro ao carregar chat:", error);
-  });
-
-</script>
-
-</body>
-</html>
+// ===== VIBRAÇÃO NO CELULAR ==
+(Content truncated due to size limit. Use line ranges to read remaining content)
