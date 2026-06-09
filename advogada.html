@@ -1052,34 +1052,36 @@ window.gerarRelatorioWord = function() {
   const conteudo = gerarConteudoRelatorio();
   const data = formatarData().replace(/\//g, "-");
   
-  const blob = new Blob([conteudo], { type: "application/msword" });
+  // Criar como texto simples (compatível com Word)
+  const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Relatorio_Juridico_${data}.doc`;
+  link.download = `Relatorio_Juridico_${data}.txt`;
   link.click();
   
   URL.revokeObjectURL(url);
   fecharModalRelatorio();
-  alert("✅ Relatório Word baixado com sucesso!");
+  alert("✅ Relatório baixado com sucesso! (Arquivo .txt - abra com Word)");
 };
 
 window.gerarRelatorioPDF = function() {
   const conteudo = gerarConteudoRelatorio();
   const data = formatarData().replace(/\//g, "-");
   
-  const blob = new Blob([conteudo], { type: "application/pdf" });
+  // Criar como texto simples (compatível com mais navegadores)
+  const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Relatorio_Juridico_${data}.pdf`;
+  link.download = `Relatorio_Juridico_${data}.txt`;
   link.click();
   
   URL.revokeObjectURL(url);
   fecharModalRelatorio();
-  alert("✅ Relatório PDF baixado com sucesso!");
+  alert("✅ Relatório baixado com sucesso! (Arquivo .txt)");
 };
 
 window.gerarRelatorioEmail = function() {
@@ -1089,6 +1091,7 @@ window.gerarRelatorioEmail = function() {
   const assunto = `Relatório Diário Jurídico - ${data}`;
   const corpo = encodeURIComponent(conteudo);
   
+  // Abre o cliente de email padrão da máquina/celular
   window.location.href = `mailto:?subject=${encodeURIComponent(assunto)}&body=${corpo}`;
   
   fecharModalRelatorio();
