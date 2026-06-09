@@ -569,8 +569,9 @@
 
     @media (max-width: 768px) {
       .container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr;
+    grid-template-columns: 80% 20%;
+    grid-template-rows: auto 1fr;
+}
       }
 .fila-box {
     grid-column: 1;
@@ -580,7 +581,8 @@
 .atendidos-box {
     grid-column: 2;
     grid-row: 1;
-    max-height: none;
+    width: 120px;
+    max-width: 120px;
 }
 
 .chat-box {
@@ -588,7 +590,6 @@
     grid-row: 2;
     min-height: 300px;
 }
-    }
 
     @media (max-width: 480px) {
       .header {
