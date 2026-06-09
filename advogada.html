@@ -647,6 +647,7 @@
 
 <div class="container">
 
+  <!-- FILA DE ESPERA -->
   <div class="box fila-box">
     <div class="box-titulo">
       📋 Fila de Espera
@@ -655,6 +656,7 @@
     <div id="fila" class="fila-container"></div>
   </div>
 
+  <!-- ATENDIDOS (CANTINHO) -->
   <div class="box atendidos-box">
     <div class="box-titulo-pequeno">
       ✅ Atendidos
@@ -662,16 +664,17 @@
     <div id="atendidos" class="atendidos-container"></div>
   </div>
 
+  <!-- CHAT GRANDE -->
   <div class="box chat-box">
     <div class="box-titulo">
       💬 Chat com Recepção
       <span id="badge-chat" class="notificacao-badge" style="display:none;">0</span>
     </div>
     <div class="chat-container">
-      <div id="aviso-mensagem" class="aviso-mensagem" style="display:none;"></div>
+      <div id="aviso-mensagem"></div>
       <div class="chat-tabs">
-        <div id="tab-nao-lidas" class="chat-tab ativo" onclick="mudarAba('nao-lidas', this)">📨 Não Lidas</div>
-        <div id="tab-todas" class="chat-tab" onclick="mudarAba('todas', this)">💬 Todas</div>
+        <div class="chat-tab ativo" onclick="mudarAba('nao-lidas')">📨 Não Lidas</div>
+        <div class="chat-tab" onclick="mudarAba('todas')">💬 Todas</div>
       </div>
       <div id="chat" class="chat-messages"></div>
       <div class="chat-input-group">
@@ -683,6 +686,7 @@
 
 </div>
 
+<!-- MODAL DE RELATÓRIO -->
 <div id="modalRelatorio" class="modal">
   <div class="modal-content">
     <div class="modal-titulo">📊 Gerar Relatório Diário</div>
@@ -700,7 +704,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-// ===== CONFIGURAÇÃO DO FIREBASE =====
+
 const firebaseConfig = {
   apiKey: "AIzaSyC58wsopM1NySU4EZclGuwhgzVUeVf4B_k",
   authDomain: "senha-36ecb.firebaseapp.com",
@@ -713,40 +717,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ===== CONTROLES GLOBAIS =====
 let abaAtiva = "nao-lidas";
 let todasAsMensagens = [];
-let listaAtendidosRelatorio = [];
 let ultimaMensagemNotificada = 0;
 let ultimaFilaLength = 0;
+let filaAtualizada = [];
+let atendidosAtualizados = [];
 
-// ===== CONTROLE DE INTERFACE (MODAL E ABAS) =====
-window.abrirModalRelatorio = function(){
-  const m = document.getElementById('modalRelatorio');
-  if(m) m.classList.add('ativo');
-};
+// ===== DETECÇÃO DE CONEXÃO =====
 
-window.fecharModalRelatorio = function(){
-  const m = document.getElementById('modalRelatorio');
-  if(m) m.classList.remove('ativo');
-};
-
-window.mudarAba = function(aba, el){
-  abaAtiva = aba;
-  document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('ativo'));
-  if(el) {
-    el.classList.add('ativo');
-  } else {
-    if(aba === 'todas') document.getElementById('tab-todas').classList.add('ativo');
-    if(aba === 'nao-lidas') document.getElementById('tab-nao-lidas').classList.add('ativo');
-  }
-  atualizarChat();
-};
-
-// ===== CONEXÃO E ALERTAS NATIVOS =====
 function atualizarStatusConexao() {
   const statusIcon = document.getElementById("status-icon");
   const statusTexto = document.getElementById("status-texto");
+
   if (navigator.onLine) {
     statusIcon.classList.remove("offline");
     statusTexto.innerText = "Online";
@@ -755,21 +738,28 @@ function atualizarStatusConexao() {
     statusTexto.innerText = "Offline";
   }
 }
+
 window.addEventListener("online", atualizarStatusConexao);
 window.addEventListener("offline", atualizarStatusConexao);
 atualizarStatusConexao();
+
+// ===== NOTIFICAÇÃO COM SOM =====
 
 function tocarSom() {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
+
     oscillator.frequency.value = 800;
     oscillator.type = "sine";
+
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
   } catch (e) {
@@ -777,226 +767,342 @@ function tocarSom() {
   }
 }
 
-function vibrarDispositivo() {
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+// ===== VIBRAÇÃO NO CELULAR =====
+
+function vibrar() {
+  if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]);
+  }
 }
 
-// ===== ESCUTA EM TEMPO REAL: FILA JURÍDICA =====
-db.collection("fila_juridica").orderBy("timestamp", "asc").onSnapshot(snapshot => {
-  const filaContainer = document.getElementById("fila");
-  const atendidosContainer = document.getElementById("atendidos");
-  const badgeFila = document.getElementById("badge-fila");
+// ===== EXIBIÇÃO DA FILA =====
 
-  filaContainer.innerHTML = "";
-  atendidosContainer.innerHTML = "";
-  listaAtendidosRelatorio = []; 
+db.collection("fila_juridica").orderBy("data")
+  .onSnapshot((snap) => {
+    const fila = document.getElementById("fila");
+    const atendidos = document.getElementById("atendidos");
+    const badgeFila = document.getElementById("badge-fila");
 
-  let totalEspera = 0;
+    fila.innerHTML = "";
+    atendidos.innerHTML = "";
 
-  snapshot.forEach(doc => {
-    const dados = doc.data();
-    const id = doc.id;
+    const filaAtiva = [];
+    const atendidosList = [];
 
-    if (dados.status === "aguardando") {
-      totalEspera++;
-      const classeBadge = dados.tipo === "Cooperado" ? "cooperado" : "auxiliar";
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="card-topo">
-          <span class="senha">${dados.senha || '---'}</span>
-          <span class="badge ${classeBadge}">${dados.tipo || 'Cliente'}</span>
-        </div>
-        <div class="info"><strong>Nome:</strong> ${dados.nome || 'Não informado'}</div>
-        <div class="info"><strong>Carro/Prefixo:</strong> ${dados.prefixo || '---'}</div>
-        ${dados.motivo ? `<div class="msg"><strong>Motivo:</strong> ${dados.motivo}</div>` : ''}
-        <button class="btn-atender" onclick="atenderCliente('${id}')">Atender Cliente</button>
-      `;
-      filaContainer.appendChild(card);
-    } 
-    else if (dados.status === "atendido") {
-      listaAtendidosRelatorio.push(dados);
-      const cardAtendido = document.createElement("div");
-      cardAtendido.className = "card card-atendido";
-      cardAtendido.innerHTML = `
-        <div class="card-topo-pequeno">
-          <span class="senha-pequena">${dados.senha || '---'}</span>
-          <span class="info-pequena">${dados.nome || 'Não informado'}</span>
-        </div>
-      `;
-      atendidosContainer.appendChild(cardAtendido);
+    snap.forEach((doc) => {
+      const d = doc.data();
+      if (d.status !== "atendido") {
+        filaAtiva.push({ id: doc.id, ...d });
+      } else {
+        atendidosList.push({ id: doc.id, ...d });
+      }
+    });
+
+    // Guardar dados para relatório
+    filaAtualizada = filaAtiva;
+    atendidosAtualizados = atendidosList;
+
+    // Notificação de nova senha
+    if (filaAtiva.length > ultimaFilaLength) {
+      tocarSom();
+      vibrar();
+      ultimaFilaLength = filaAtiva.length;
+    } else if (filaAtiva.length < ultimaFilaLength) {
+      ultimaFilaLength = filaAtiva.length;
     }
+
+    // FILA DE ESPERA
+    if (filaAtiva.length === 0) {
+      fila.innerHTML = '<div class="vazio">✅ Nenhuma senha na fila</div>';
+      badgeFila.style.display = "none";
+    } else {
+      badgeFila.style.display = "inline-block";
+      badgeFila.innerText = filaAtiva.length;
+
+      filaAtiva.forEach((d) => {
+        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+
+        const card = `
+          <div class="card">
+            <div class="card-topo">
+              <div class="senha">Nº ${d.senha}</div>
+              <div class="badge ${classe}">${d.tipo}</div>
+            </div>
+            <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
+            <div class="info"><b>Nome:</b> ${d.nome}</div>
+            ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
+            <button class="btn-atender" onclick="atenderSenha('${d.id}')">✅ Atendido</button>
+          </div>
+        `;
+
+        fila.innerHTML += card;
+      });
+    }
+
+    // ATENDIDOS (CANTINHO)
+    if (atendidosList.length === 0) {
+      atendidos.innerHTML = '<div class="vazio-pequeno">Nenhum atendido</div>';
+    } else {
+      atendidosList.forEach((d) => {
+        const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+
+        const card = `
+          <div class="card card-atendido">
+            <div class="card-topo-pequeno">
+              <div class="senha-pequena">Nº ${d.senha}</div>
+              <div class="badge-pequeno ${classe}">${d.tipo}</div>
+            </div>
+            <div class="info-pequena"><b>Prefixo:</b> ${d.prefixo}</div>
+            <div class="info-pequena"><b>Nome:</b> ${d.nome}</div>
+          </div>
+        `;
+
+        atendidos.innerHTML += card;
+      });
+    }
+  }, (error) => {
+    console.log("Erro ao carregar fila:", error);
   });
 
-  if (totalEspera > 0) {
-    badgeFila.innerText = totalEspera;
-    badgeFila.style.display = "inline-block";
-  } else {
-    badgeFila.style.display = "none";
-    filaContainer.innerHTML = '<div class="vazio">Nenhum cliente na fila de espera.</div>';
+window.atenderSenha = async function(id) {
+  try {
+    await db.collection("fila_juridica").doc(id).update({
+      status: "atendido"
+    });
+  } catch (e) {
+    console.log("Erro ao atender:", e);
   }
-
-  if (atendidosContainer.children.length === 0) {
-    atendidosContainer.innerHTML = '<div class="vazio-pequeno">Nenhum atendimento hoje.</div>';
-  }
-
-  if (totalEspera > ultimaFilaLength) {
-    tocarSom();
-    vibrarDispositivo();
-  }
-  ultimaFilaLength = totalEspera;
-});
-
-window.atenderCliente = function(id) {
-  db.collection("fila_juridica").doc(id).update({
-    status: "atendido",
-    atendidoEm: firebase.firestore.FieldValue.serverTimestamp()
-  }).catch(erro => console.error("Erro ao atender:", erro));
 };
 
-// ===== ESCUTA EM TEMPO REAL: CHAT JURÍDICO =====
-db.collection("chat_juridico").orderBy("timestamp", "asc").onSnapshot(snapshot => {
-  todasAsMensagens = [];
-  let naoLidasContador = 0;
+// ===== SISTEMA DE CHAT (CORRIGIDO) =====
 
-  snapshot.forEach(doc => {
-    const msg = doc.data();
-    msg.id = doc.id;
-    todasAsMensagens.push(msg);
+window.enviarMensagem = async function() {
+  const mensagem = document.getElementById("mensagem").value.trim();
 
-    if (msg.origem === "recepcao" && !msg.lida) {
-      naoLidasContador++;
-    }
+  if (!mensagem) return;
+
+  try {
+    await db.collection("chat_juridico").add({
+      remetente: "advogada",
+      mensagem,
+      timestamp: Date.now(),
+      lido: true
+    });
+
+    document.getElementById("mensagem").value = "";
+  } catch (e) {
+    console.log("Erro ao enviar mensagem:", e);
+  }
+};
+
+window.mudarAba = function(aba) {
+  abaAtiva = aba;
+  
+  document.querySelectorAll(".chat-tab").forEach(tab => {
+    tab.classList.remove("ativo");
   });
+  event.target.classList.add("ativo");
 
-  const badgeChat = document.getElementById("badge-chat");
-  const avisoMensagem = document.getElementById("aviso-mensagem");
-
-  if (naoLidasContador > 0) {
-    badgeChat.innerText = naoLidasContador;
-    badgeChat.style.display = "inline-block";
-    avisoMensagem.innerText = `Você possui ${naoLidasContador} mensagem(ns) não lida(s) da Recepção!`;
-    avisoMensagem.style.display = "block";
-  } else {
-    badgeChat.style.display = "none";
-    avisoMensagem.style.display = "none";
+  // Marcar como lido apenas quando abrir aba "não lidas"
+  if (aba === "nao-lidas") {
+    todasAsMensagens.forEach((msg) => {
+      if (msg.remetente === "recepcao" && !msg.lido) {
+        db.collection("chat_juridico").doc(msg.id).update({ lido: true }).catch(e => console.log(e));
+      }
+    });
   }
-
-  if (todasAsMensagens.length > ultimaMensagemNotificada) {
-    const ultimaMsg = todasAsMensagens[todasAsMensagens.length - 1];
-    if (ultimaMsg && ultimaMsg.origem === "recepcao") {
-      tocarSom();
-    }
-  }
-  ultimaMensagemNotificada = todasAsMensagens.length;
 
   atualizarChat();
-});
+};
 
 function atualizarChat() {
-  const chatContainer = document.getElementById("chat");
-  if(!chatContainer) return;
-  chatContainer.innerHTML = "";
+  const chatDiv = document.getElementById("chat");
+  chatDiv.innerHTML = "";
 
-  const mensagensFiltradas = todasAsMensagens.filter(msg => {
-    if (abaAtiva === "nao-lidas") {
-      return msg.origem === "recepcao" && !msg.lida;
-    }
-    return true; 
-  });
+  let mensagensParaMostrar = [];
 
-  if (mensagensFiltradas.length === 0) {
-    chatContainer.innerHTML = `<div class="vazio">Nenhuma mensagem nesta aba.</div>`;
+  if (abaAtiva === "nao-lidas") {
+    // Mostrar apenas mensagens NÃO lidas da recepção
+    mensagensParaMostrar = todasAsMensagens.filter(msg => msg.remetente === "recepcao" && !msg.lido);
+  } else if (abaAtiva === "todas") {
+    // Mostrar todas as mensagens
+    mensagensParaMostrar = todasAsMensagens;
+  }
+
+  if (mensagensParaMostrar.length === 0) {
+    chatDiv.innerHTML = `<div class="vazio">${abaAtiva === "nao-lidas" ? "Sem mensagens não lidas" : "Sem mensagens"}</div>`;
     return;
   }
 
-  mensagensFiltradas.forEach(msg => {
-    const div = document.createElement("div");
-    const classeOrigem = msg.origem === "advogada" ? "enviado" : "recebido";
-    div.className = `chat-message ${classeOrigem}`;
-    div.innerText = msg.texto || "";
+  mensagensParaMostrar.forEach((d) => {
+    const classe = d.remetente === "advogada" ? "enviado" : "recebido";
+    const label = d.remetente === "advogada" ? "Você" : "Recepção";
 
-    if (msg.origem === "recepcao" && !msg.lida) {
-      marcarComoLida(msg.id);
-    }
-    chatContainer.appendChild(div);
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `chat-message ${classe}`;
+    msgDiv.innerHTML = `<strong>${label}:</strong> ${d.mensagem}`;
+    chatDiv.appendChild(msgDiv);
   });
 
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
-function marcarComoLida(id) {
-  db.collection("chat_juridico").doc(id).update({ lida: true })
-    .catch(err => console.log("Erro ao marcar lida:", err));
-}
+db.collection("chat_juridico").orderBy("timestamp")
+  .onSnapshot((snap) => {
+    todasAsMensagens = [];
+    let naoLidas = 0;
 
-window.enviarMensagem = function() {
-  const input = document.getElementById("mensagem");
-  const texto = input.value.trim();
-  if (!texto) return;
+    snap.forEach((doc) => {
+      const d = doc.data();
+      todasAsMensagens.push({ id: doc.id, ...d });
 
-  db.collection("chat_juridico").add({
-    texto: texto,
-    origem: "advogada",
-    lida: false,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(() => {
-    input.value = "";
-    mudarAba("todas", null);
-  })
-  .catch(erro => console.error("Erro ao enviar mensagem:", erro));
+      if (d.remetente === "recepcao" && !d.lido) {
+        naoLidas++;
+      }
+    });
+
+    const badgeChat = document.getElementById("badge-chat");
+    const aviso = document.getElementById("aviso-mensagem");
+
+    if (naoLidas > 0) {
+      badgeChat.style.display = "inline-block";
+      badgeChat.innerText = naoLidas;
+      aviso.innerHTML = `<div class="aviso-mensagem">🔔 ${naoLidas} mensagem${naoLidas > 1 ? 's' : ''} não lida${naoLidas > 1 ? 's' : ''}</div>`;
+      
+      if (Date.now() - ultimaMensagemNotificada > 2000) {
+        tocarSom();
+        vibrar();
+        ultimaMensagemNotificada = Date.now();
+      }
+    } else {
+      badgeChat.style.display = "none";
+      aviso.innerHTML = "";
+    }
+
+    atualizarChat();
+  }, (error) => {
+    console.log("Erro ao carregar chat:", error);
+  });
+
+// ===== MODAL DE RELATÓRIO =====
+
+window.abrirModalRelatorio = function() {
+  document.getElementById("modalRelatorio").classList.add("ativo");
 };
 
-// ===== GERAÇÃO DE TEXTO DO RELATÓRIO DE ATENDIMENTOS =====
-function obterTextoRelatorio() {
-  const dataHoje = new Date().toLocaleDateString('pt-BR');
-  let texto = `RELATÓRIO DIÁRIO DE ATENDIMENTO JURÍDICO - ${dataHoje}\n`;
-  texto += `==================================================\n\n`;
+window.fecharModalRelatorio = function() {
+  document.getElementById("modalRelatorio").classList.remove("ativo");
+};
+
+// ===== GERAÇÃO DE RELATÓRIO =====
+
+function formatarData() {
+  const hoje = new Date();
+  return hoje.toLocaleDateString("pt-BR");
+}
+
+function formatarHora() {
+  const agora = new Date();
+  return agora.toLocaleTimeString("pt-BR");
+}
+
+function gerarConteudoRelatorio() {
+  const data = formatarData();
+  const hora = formatarHora();
   
-  if (listaAtendidosRelatorio.length === 0) {
-    texto += `Nenhum atendimento registrado no dia de hoje.\n`;
-    return texto;
+  let conteudo = `RELATÓRIO DIÁRIO - SETOR JURÍDICO\n`;
+  conteudo += `Data: ${data}\n`;
+  conteudo += `Hora: ${hora}\n`;
+  conteudo += `${'='.repeat(50)}\n\n`;
+
+  conteudo += `FILA DE ESPERA (${filaAtualizada.length} senhas)\n`;
+  conteudo += `${'-'.repeat(50)}\n`;
+  
+  if (filaAtualizada.length === 0) {
+    conteudo += `Nenhuma senha na fila\n`;
+  } else {
+    filaAtualizada.forEach((item) => {
+      conteudo += `\nSenha: ${item.senha}\n`;
+      conteudo += `Tipo: ${item.tipo}\n`;
+      conteudo += `Prefixo: ${item.prefixo}\n`;
+      conteudo += `Nome: ${item.nome}\n`;
+      if (item.recado) conteudo += `Observações: ${item.recado}\n`;
+    });
   }
 
-  listaAtendidosRelatorio.forEach((c, index) => {
-    texto += `${index + 1}. SENHA: ${c.senha || '---'} | Nome: ${c.nome || 'Não Informado'}\n`;
-    texto += `   Tipo: ${c.tipo || '---'} | Prefixo: ${c.prefixo || '---'}\n`;
-    if(c.motivo) texto += `   Motivo: ${c.motivo}\n`;
-    texto += `--------------------------------------------------\n`;
-  });
-  return texto;
+  conteudo += `\n\n${'='.repeat(50)}\n`;
+  conteudo += `ATENDIDOS (${atendidosAtualizados.length} senhas)\n`;
+  conteudo += `${'-'.repeat(50)}\n`;
+  
+  if (atendidosAtualizados.length === 0) {
+    conteudo += `Nenhuma senha atendida\n`;
+  } else {
+    atendidosAtualizados.forEach((item) => {
+      conteudo += `\nSenha: ${item.senha}\n`;
+      conteudo += `Tipo: ${item.tipo}\n`;
+      conteudo += `Prefixo: ${item.prefixo}\n`;
+      conteudo += `Nome: ${item.nome}\n`;
+    });
+  }
+
+  return conteudo;
 }
 
-// ===== PROCESSADORES DOS BOTÕES DO RELATÓRIO NATIVO =====
-window.gerarRelatorioWord = function(){
-  const texto = obterTextoRelatorio();
-  const blob = new Blob([texto], {type: "application/msword;charset=utf-8"});
+window.gerarRelatorioWord = function() {
+  const conteudo = gerarConteudoRelatorio();
+  const data = formatarData().replace(/\//g, "-");
+  
+  const blob = new Blob([conteudo], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `Relatorio_Juridico_${new Date().toISOString().slice(0,10)}.doc`;
+  link.href = url;
+  link.download = `Relatorio_Juridico_${data}.doc`;
   link.click();
+  
+  URL.revokeObjectURL(url);
+  fecharModalRelatorio();
+  alert("✅ Relatório Word baixado com sucesso!");
 };
 
-window.gerarRelatorioPDF = function(){
-  const texto = obterTextoRelatorio();
-  const blob = new Blob([texto], {type: "application/pdf;charset=utf-8"});
+window.gerarRelatorioPDF = function() {
+  const conteudo = gerarConteudoRelatorio();
+  const data = formatarData().replace(/\//g, "-");
+  
+  const blob = new Blob([conteudo], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `Relatorio_Juridico_${new Date().toISOString().slice(0,10)}.pdf`;
+  link.href = url;
+  link.download = `Relatorio_Juridico_${data}.pdf`;
   link.click();
+  
+  URL.revokeObjectURL(url);
+  fecharModalRelatorio();
+  alert("✅ Relatório PDF baixado com sucesso!");
 };
 
-window.gerarRelatorioEmail = function(){
-  const assunto = encodeURIComponent(`Relatório de Atendimentos Jurídicos - ${new Date().toLocaleDateString('pt-BR')}`);
-  const corpo = encodeURIComponent(obterTextoRelatorio());
-  window.location.href = `mailto:?subject=${assunto}&body=${corpo}`;
+window.gerarRelatorioEmail = function() {
+  const conteudo = gerarConteudoRelatorio();
+  const data = formatarData();
+  
+  const assunto = `Relatório Diário Jurídico - ${data}`;
+  const corpo = encodeURIComponent(conteudo);
+  
+  window.location.href = `mailto:?subject=${encodeURIComponent(assunto)}&body=${corpo}`;
+  
+  fecharModalRelatorio();
 };
 
-window.gerarRelatorioWhatsApp = function(){
-  const textoUrl = encodeURIComponent(obterTextoRelatorio());
-  window.open(`https://api.whatsapp.com/send?text=${textoUrl}`, '_blank');
+window.gerarRelatorioWhatsApp = function() {
+  const conteudo = gerarConteudoRelatorio();
+  const mensagem = encodeURIComponent(conteudo);
+  
+  window.open(`https://wa.me/?text=${mensagem}`, "_blank");
+  
+  fecharModalRelatorio();
 };
+
 </script>
 
 </body>
