@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fila Jurídica - CooperTaxi</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      display: flex;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      justify-content: center;
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    main {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+      max-width: 1000px;
+      padding: 36px;
+      text-align: center;
+      width: 100%;
+    }
+
+    h1 { color: #5568d3; font-size: clamp(28px, 4vw, 46px); margin: 0 0 12px; }
+    .subtitulo { color: #666; font-size: clamp(16px, 2vw, 22px); margin: 0 0 28px; }
+    .chamada { background: #f3f4ff; border-radius: 16px; padding: 28px; }
+    .rotulo { color: #666; font-size: 18px; font-weight: bold; margin: 0; }
+    .senha-atual { color: #5568d3; font-size: clamp(64px, 14vw, 150px); font-weight: bold; line-height: 1.1; margin: 8px 0; }
+    .detalhe { color: #555; font-size: clamp(18px, 3vw, 28px); margin: 0; }
+    .proximas { margin-top: 32px; }
+    h2 { font-size: clamp(20px, 3vw, 30px); margin: 0 0 16px; }
+    #lista-proximas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .proxima-senha { background: #667eea; border-radius: 12px; color: white; font-size: clamp(26px, 4vw, 42px); font-weight: bold; min-width: 100px; padding: 14px 20px; }
+    .vazio { color: #777; font-size: 20px; }
+    .total { color: #555; font-size: 18px; margin: 30px 0 0; }
+    .voltar { color: #5568d3; display: inline-block; font-weight: bold; margin-top: 24px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🚕 Fila Jurídica CooperTaxi</h1>
+    <p class="subtitulo">Acompanhe o atendimento em tempo real</p>
+
+    <section class="chamada" aria-live="polite">
+      <p class="rotulo">Senha em atendimento</p>
+      <div id="senha-atual" class="senha-atual">—</div>
+      <p id="detalhe-atual" class="detalhe">Aguardando chamada</p>
+    </section>
+
+    <section class="proximas" aria-live="polite">
+      <h2>Próximas senhas</h2>
+      <div id="lista-proximas"><span class="vazio">Carregando fila...</span></div>
+      <p id="total-fila" class="total">0 senha(s) aguardando</p>
+    </section>
+
+    <a class="voltar" href="index.html">← Voltar para a recepção</a>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC58wsopM1NySU4EZclGuwhgzVUeVf4B_k",
+      authDomain: "senha-36ecb.firebaseapp.com",
+      projectId: "senha-36ecb",
+      storageBucket: "senha-36ecb.firebasestorage.app",
+      messagingSenderId: "512666147464",
+      appId: "1:512666147464:web:8b040b147f27314ffa5d3d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection("fila_juridica").orderBy("data").onSnapshot((snap) => {
+      const senhas = [];
+      snap.forEach((doc) => senhas.push(doc.data()));
+
+      const emAtendimento = senhas.find((senha) => senha.status === "em_atendimento");
+      const aguardando = senhas.filter((senha) => senha.status === "fila" || senha.status === "aguardando");
+      const senhaAtual = document.getElementById("senha-atual");
+      const detalheAtual = document.getElementById("detalhe-atual");
+      const listaProximas = document.getElementById("lista-proximas");
+
+      senhaAtual.textContent = emAtendimento ? `Nº ${emAtendimento.senha}` : "—";
+      detalheAtual.textContent = emAtendimento ? "Dirija-se ao atendimento jurídico" : "Aguardando chamada";
+      listaProximas.innerHTML = "";
+
+      if (aguardando.length === 0) {
+        const vazio = document.createElement("span");
+        vazio.className = "vazio";
+        vazio.textContent = "Não há senhas aguardando";
+        listaProximas.appendChild(vazio);
+      } else {
+        aguardando.slice(0, 5).forEach((senha) => {
+          const item = document.createElement("span");
+          item.className = "proxima-senha";
+          item.textContent = `Nº ${senha.senha}`;
+          listaProximas.appendChild(item);
+        });
+      }
+
+      document.getElementById("total-fila").textContent = `${aguardando.length} senha(s) aguardando`;
+    }, (error) => {
+      document.getElementById("lista-proximas").textContent = "Não foi possível carregar a fila.";
+      console.log("Erro ao carregar fila pública:", error);
+    });
+  </script>
+</body>
+</html>
