@@ -635,6 +635,7 @@
         grid-template-columns: 1fr;
       }
     }
+  .acoes-fila { display:flex; gap:8px; padding:10px; } .acoes-fila button { margin:0; } .btn-relatorio { text-decoration:none; display:inline-block; }
   </style>
 
 <style id="layout-fix-final">
@@ -690,6 +691,8 @@
 <div class="header">
   <h1>👩‍⚖️ Painel Advogada</h1>
   <div class="header-direita">
+    <a href="index.html" class="btn-relatorio">🏢 Recepção</a>
+    <a href="publica.html" target="_blank" rel="noopener" class="btn-relatorio">📺 Pública</a>
     <button class="btn-relatorio" onclick="abrirModalRelatorio()">📊 Relatório</button>
     <div class="status-info">
       <span class="status-icon" id="status-icon"></span>
@@ -706,6 +709,7 @@
       📋 Fila de Espera
       <span id="badge-fila" class="notificacao-badge" style="display:none;">0</span>
     </div>
+    <div class="acoes-fila"><button class="btn-atender" onclick="chamarProximaSenha()">📢 Chamar próxima senha</button><button class="btn-relatorio" onclick="publicarRecado()">📣 Publicar recado</button><button class="btn-relatorio" onclick="definirAlmoco()">🍽️ Horário de almoço</button></div>
     <div id="fila" class="fila-container"></div>
   </div>
 
@@ -884,7 +888,10 @@ db.collection("fila_juridica").orderBy("data")
             <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
             <div class="info"><b>Nome:</b> ${d.nome}</div>
             ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
-            <button class="btn-atender" onclick="atenderSenha('${d.id}')">✅ Atendido</button>
+            <button class="btn-atender" onclick="chamarSenha('${d.id}')">📢 Chamar</button>
+            <button class="btn-atender" onclick="finalizarAtendimento('${d.id}')">✅ Finalizar</button>
+            <button class="btn-relatorio" onclick="cancelarSenha('${d.id}')">❌ Cancelar</button>
+            <button class="btn-relatorio" onclick="cancelarSenha('${d.id}', true)">🚫 Desistência</button>
           </div>
         `;
 
@@ -925,6 +932,11 @@ window.atenderSenha = async function(id) {
   } catch (e) {
     console.log("Erro ao atender:", e);
   }
+};
+
+
+window.chamarSenha = async function(id) {
+  await alterarStatusSenha(id, "em_atendimento", { chamadaEm: Date.now() });
 };
 
 // ===== SISTEMA DE CHAT (CORRIGIDO) =====
@@ -1164,6 +1176,7 @@ window.gerarRelatorioWhatsApp = function() {
 
 
 
+<script src="gestao.js"></script>
 </body>
 </html>
 
