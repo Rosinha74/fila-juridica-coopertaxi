@@ -780,15 +780,24 @@ function tocarSom() {
 
 // ===== GERENCIAMENTO DE SENHAS =====
 
+const contadorRef = db.collection("configuracoes").doc("fila_juridica");
+
 async function atualizarSenha() {
   try {
-    const snap = await db.collection("fila_juridica").limit(100).get();
-    let maior = 0;
-    snap.forEach((doc) => {
-      const n = Number(doc.data().senha || 0);
-      if (n > maior) maior = n;
-    });
-    proximaSenha = maior + 1;
+    const contador = await contadorRef.get();
+
+    if (contador.exists && Number.isFinite(Number(contador.data().proximaSenha))) {
+      proximaSenha = Number(contador.data().proximaSenha);
+    } else {
+      // Compatibilidade com filas criadas antes do contador compartilhado.
+      const ultimaSenha = await db.collection("fila_juridica")
+        .orderBy("senha", "desc")
+        .limit(1)
+        .get();
+      const maior = ultimaSenha.empty ? 0 : Number(ultimaSenha.docs[0].data().senha || 0);
+      proximaSenha = maior + 1;
+    }
+
     document.getElementById("proximaSenha").innerText = proximaSenha;
   } catch (e) {
     console.log("Erro ao atualizar senha:", e);
@@ -806,25 +815,41 @@ window.gerarSenha = async function() {
     return;
   }
 
-  const senhaAtual = proximaSenha;
-  proximaSenha++;
-  document.getElementById("proximaSenha").innerText = proximaSenha;
-
-  document.getElementById("prefixo").value = "";
-  document.getElementById("nome").value = "";
-  document.getElementById("tipo").value = "Cooperado";
-  document.getElementById("recado").value = "";
-
   try {
-    await db.collection("fila_juridica").add({
-      senha: senhaAtual,
-      prefixo,
-      nome,
-      tipo,
-      recado,
-      status: "fila",
-      data: Date.now()
+    const senhaAtual = await db.runTransaction(async (transaction) => {
+      const contador = await transaction.get(contadorRef);
+      let senha;
+
+      if (contador.exists && Number.isFinite(Number(contador.data().proximaSenha))) {
+        senha = Number(contador.data().proximaSenha);
+      } else {
+        // Migra instalações existentes sem contador sem reutilizar senhas antigas.
+        const ultimaSenha = await transaction.get(
+          db.collection("fila_juridica").orderBy("senha", "desc").limit(1)
+        );
+        senha = ultimaSenha.empty ? 1 : Number(ultimaSenha.docs[0].data().senha || 0) + 1;
+      }
+
+      transaction.set(contadorRef, { proximaSenha: senha + 1 }, { merge: true });
+      transaction.set(db.collection("fila_juridica").doc(), {
+        senha,
+        prefixo,
+        nome,
+        tipo,
+        recado,
+        status: "fila",
+        data: Date.now()
+      });
+
+      return senha;
     });
+
+    proximaSenha = senhaAtual + 1;
+    document.getElementById("proximaSenha").innerText = proximaSenha;
+    document.getElementById("prefixo").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("tipo").value = "Cooperado";
+    document.getElementById("recado").value = "";
   } catch (e) {
     alert("Erro ao gerar senha. Verifique sua conexão.");
     console.log(e);
@@ -866,6 +891,8 @@ window.zerarFila = async function() {
     chatSnap.forEach((doc) => {
       promessas.push(db.collection("chat_juridico").doc(doc.id).delete());
     });
+
+    promessas.push(contadorRef.set({ proximaSenha: 1 }));
 
     await Promise.all(promessas);
     proximaSenha = 1;
