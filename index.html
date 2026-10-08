@@ -387,6 +387,26 @@
       font-size: 14px;
     }
 
+    .topo-indicadores {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-chip {
+      padding: 6px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .status-chip.aguardando { background: #e7f2ff; color: #145da0; }
+    .status-chip.chamado { background: #fff1c2; color: #825b00; }
+    .status-chip.atendida { background: #e4f5e5; color: #267034; }
+
     .cooperado {
       background: #d4a017;
     }
@@ -960,12 +980,25 @@ db.collection("fila_juridica").orderBy("data")
     snap.forEach((doc) => {
       const d = doc.data();
       const classe = d.tipo === "Cooperado" ? "cooperado" : "auxiliar";
+      const status = String(d.status || "").toLowerCase();
+      const foiAtendida = ["atendido", "attended", "finalizado"].includes(status);
+      const estaChamado = ["chamado", "called", "atendimento", "em_atendimento"].includes(status);
+      const statusChipClass = foiAtendida ? "atendida" : estaChamado ? "chamado" : "aguardando";
+      const statusLabel = foiAtendida ? "ATENDIDA" : estaChamado ? "EM ATENDIMENTO" : "AGUARDANDO";
+      const chamadaMs = Number(d.chamadoEm ?? d.calledAt ?? d.horaChamada);
+      const horarioChamada = estaChamado && Number.isFinite(chamadaMs) && chamadaMs > 0
+        ? new Date(chamadaMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        : "";
+      const statusDescription = statusLabel + (horarioChamada ? ` · ${horarioChamada}` : "");
 
       const card = `
-        <div class="card ${d.status === 'atendido' ? 'card-atendido' : ''}">
+        <div class="card ${foiAtendida ? 'card-atendido' : ''}">
           <div class="topo">
             <div class="senha">Nº ${d.senha}</div>
-            <div class="badge ${classe}">${d.tipo}</div>
+            <div class="topo-indicadores">
+              <div class="badge ${classe}">${d.tipo}</div>
+              <span class="status-chip ${statusChipClass}">${statusDescription}</span>
+            </div>
           </div>
           <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
           <div class="info"><b>Nome:</b> ${d.nome}</div>
@@ -979,7 +1012,7 @@ db.collection("fila_juridica").orderBy("data")
         </div>
       `;
 
-      if (d.status === "atendido") {
+      if (foiAtendida) {
         atendidos.innerHTML += card;
         atendidosCount++;
       } else {
