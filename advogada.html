@@ -328,6 +328,28 @@
       transform: scale(0.95);
     }
 
+    .btn-chamar {
+      width: 100%;
+      background: #087b58;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-chamar:hover {
+      background: #07543f;
+    }
+
+    .btn-chamar:active {
+      transform: scale(0.95);
+    }
+
     .vazio {
       text-align: center;
       color: #999;
@@ -884,6 +906,7 @@ db.collection("fila_juridica").orderBy("data")
             <div class="info"><b>Prefixo:</b> ${d.prefixo}</div>
             <div class="info"><b>Nome:</b> ${d.nome}</div>
             ${d.recado ? `<div class="msg">${d.recado}</div>` : ''}
+            <button class="btn-chamar" onclick="chamarSenha('${d.id}')">${d.status === "chamado" ? "🔔 Chamar novamente" : "📣 Chamar para atendimento"}</button>
             <button class="btn-atender" onclick="atenderSenha('${d.id}')">✅ Atendido</button>
           </div>
         `;
@@ -924,6 +947,17 @@ window.atenderSenha = async function(id) {
     });
   } catch (e) {
     console.log("Erro ao atender:", e);
+  }
+};
+
+window.chamarSenha = async function(id) {
+  try {
+    await db.collection("fila_juridica").doc(id).update({
+      status: "chamado",
+      chamadoEm: Date.now()
+    });
+  } catch (e) {
+    console.log("Erro ao chamar senha:", e);
   }
 };
 
@@ -1176,5 +1210,4 @@ window.gerarRelatorioWhatsApp = function() {
     min-height:360px !important;
 }
 </style>
-
 
