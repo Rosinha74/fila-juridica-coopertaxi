@@ -10,7 +10,7 @@
 <body><main class="page">
 <header class="header"><div class="brand"><img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663913771260/WZrFhEtgOSMNjzeF.png" alt="Logo oficial Coopertaxi-BH"><div>COOPERTAXI-BH<small>COOPERATIVA DE TÁXI</small></div></div><div class="title">ATENDIMENTO JURÍDICO</div><div class="datetime"><strong id="clock">--:--</strong><span id="date">--/--/----</span></div></header>
 <div id="lunch" class="notice lunch" hidden>🟠 PAUSA PARA ALMOÇO<br><span id="lunchReturn"></span></div><div id="mural" class="notice mural" hidden>📢 <span id="muralText"></span></div>
-<section><div class="section-title">🟡 Em Atendimento</div><div id="current" class="list"></div></section><section><div class="section-title">🔵 Aguardando</div><div id="waiting" class="list"></div></section><section><div class="section-title">🟢 Atendidas</div><div id="attended" class="list"></div></section><section><div class="section-title">🔴 Canceladas</div><div id="cancelled" class="list"></div></section>
+<section><div class="section-title">🟡 Em Atendimento</div><div id="current" class="list" role="status" aria-live="polite" aria-atomic="false"></div></section><section><div class="section-title">🔵 Aguardando</div><div id="waiting" class="list"></div></section><section><div class="section-title">🟢 Atendidas</div><div id="attended" class="list"></div></section><section><div class="section-title">🔴 Canceladas</div><div id="cancelled" class="list"></div></section>
 <div class="privacy">🔒 Privacidade: esta tela não exibe nome completo, CPF, telefone, e-mail, assunto jurídico, observações ou mensagens internas.</div><footer class="footer">Atualização automática em tempo real · Coopertaxi-BH</footer>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script>
@@ -20,6 +20,47 @@ function norm(s){s=String(s||'').toLowerCase();if(['atendimento','em_atendimento
 function identity(d){return d.prefixo?`PREFIXO ${esc(d.prefixo)}`:esc(firstName(d.nome))}
 function stamp(d,kind){return kind==='current'?val(d,['chamadoEm','calledAt','horaChamada','data']):kind==='attended'?val(d,['atendidoEm','attendedAt','horaAtendimento','data']):kind==='cancelled'?val(d,['canceladoEm','cancelledAt','horaCancelamento','data']):val(d,['data','createdAt'])}
 function row(d,kind){const labels={current:'EM ATENDIMENTO',waiting:'AGUARDANDO',attended:'ATENDIDA',cancelled:'CANCELADA'};const t=stamp(d,kind);return `<div class="row ${kind}"><span class="dot"></span><div class="number">Nº ${esc(d.senha??'—')}</div><div class="identity">${identity(d)}<small class="status">${labels[kind]}</small></div><div class="time">${fmt(t)}<small>${kind==='current'?'Horário da chamada':kind==='waiting'?'Horário de registro':kind==='attended'?'Horário do atendimento':'Horário'}</small></div></div>`}
-function empty(text){return `<div class="empty">${text}</div>`}function render(snap){const groups={current:[],waiting:[],attended:[],cancelled:[]};let settings={};snap.forEach(doc=>{const d={id:doc.id,...doc.data()};if(d.config||d.mural||d.mensagem||d.pausaAlmoco||d.tipo==='config'){settings={...settings,...d};return}groups[norm(d.status)].push(d)});Object.keys(groups).forEach(k=>groups[k].sort((a,b)=>Number(a.data||0)-Number(b.data||0)));document.getElementById('current').innerHTML=groups.current.length?groups.current.map(d=>row(d,'current')).join(''):empty('Nenhuma senha em atendimento.');document.getElementById('waiting').innerHTML=groups.waiting.length?groups.waiting.map(d=>row(d,'waiting')).join(''):empty('Nenhuma senha aguardando.');document.getElementById('attended').innerHTML=groups.attended.length?groups.attended.slice(-12).reverse().map(d=>row(d,'attended')).join(''):empty('Nenhuma senha atendida.');document.getElementById('cancelled').innerHTML=groups.cancelled.length?groups.cancelled.slice(-8).reverse().map(d=>row(d,'cancelled')).join(''):empty('Nenhuma senha cancelada.');const lunch=settings.pausaAlmoco||settings.lunch||{};const lunchOn=lunch===true||lunch.enabled===true||settings.pausaAtiva===true;document.getElementById('lunch').hidden=!lunchOn;document.getElementById('lunchReturn').textContent=lunchOn?`Retorno previsto: ${lunch.returnAt||lunch.retorno||'13:00'}`:'';const msg=settings.mural||settings.mensagem||settings.aviso||'';document.getElementById('mural').hidden=!msg;document.getElementById('muralText').textContent=msg}
+function latestCallRow(d){return row(d,'current').replace('EM ATENDIMENTO','ÚLTIMA SENHA CHAMADA')}
+function empty(text){return `<div class="empty">${text}</div>`}
+function render(snap){
+  const groups={current:[],waiting:[],attended:[],cancelled:[]};
+  let settings={};
+  let lastCalled=null;
+  snap.forEach(doc=>{
+    const d={id:doc.id,...doc.data()};
+    if(d.config||d.mural||d.mensagem||d.pausaAlmoco||d.tipo==='config'){
+      settings={...settings,...d};
+      return;
+    }
+    const kind=norm(d.status);
+    groups[kind].push(d);
+    const callTime=val(d,['chamadoEm','calledAt','horaChamada']);
+    if(kind!=='cancelled'&&(callTime!==undefined||kind==='current')){
+      const timestamp=Number(callTime??d.data??0);
+      if(Number.isFinite(timestamp)&&(!lastCalled||timestamp>lastCalled.timestamp)){
+        lastCalled={ticket:d,timestamp};
+      }
+    }
+  });
+  const byRegistration=(a,b)=>Number(a.data||0)-Number(b.data||0);
+  groups.waiting.sort(byRegistration);
+  groups.attended.sort(byRegistration);
+  groups.cancelled.sort(byRegistration);
+  groups.current.sort((a,b)=>Number(stamp(b,'current')||0)-Number(stamp(a,'current')||0));
+  const currentRows=groups.current.length
+    ?groups.current.map(d=>row(d,'current')).join('')
+    :lastCalled?latestCallRow(lastCalled.ticket):empty('Nenhuma senha em atendimento.');
+  document.getElementById('current').innerHTML=currentRows;
+  document.getElementById('waiting').innerHTML=groups.waiting.length?groups.waiting.map(d=>row(d,'waiting')).join(''):empty('Nenhuma senha aguardando.');
+  document.getElementById('attended').innerHTML=groups.attended.length?groups.attended.slice(-12).reverse().map(d=>row(d,'attended')).join(''):empty('Nenhuma senha atendida.');
+  document.getElementById('cancelled').innerHTML=groups.cancelled.length?groups.cancelled.slice(-8).reverse().map(d=>row(d,'cancelled')).join(''):empty('Nenhuma senha cancelada.');
+  const lunch=settings.pausaAlmoco||settings.lunch||{};
+  const lunchOn=lunch===true||lunch.enabled===true||settings.pausaAtiva===true;
+  document.getElementById('lunch').hidden=!lunchOn;
+  document.getElementById('lunchReturn').textContent=lunchOn?`Retorno previsto: ${lunch.returnAt||lunch.retorno||'13:00'}`:'';
+  const msg=settings.mural||settings.mensagem||settings.aviso||'';
+  document.getElementById('mural').hidden=!msg;
+  document.getElementById('muralText').textContent=msg;
+}
 db.collection('fila_juridica').orderBy('data').onSnapshot(render,()=>{['current','waiting','attended','cancelled'].forEach(id=>document.getElementById(id).innerHTML=empty('Não foi possível atualizar a fila.'))});function tick(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});document.getElementById('date').textContent=d.toLocaleDateString('pt-BR')}tick();setInterval(tick,1000);
 </script></body></html>
