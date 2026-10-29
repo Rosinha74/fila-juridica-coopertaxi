@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agenda Jurídica Compartilhada | Coopertaxi-BH</title>
+<style>
+:root{--navy:#12345a;--blue:#1d5fa7;--pale:#eef5fc;--line:#d9e3ee;--ink:#172b3a;--muted:#627386;--green:#137b55;--red:#b42332;--amber:#9a6700}
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:var(--ink);font:15px/1.5 "Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(120deg,#12345a,#1d5fa7);color:#fff;padding:22px max(18px,calc((100vw - 1250px)/2));}
+.brand{font-size:13px;letter-spacing:1.5px;font-weight:800;opacity:.9}.headrow{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}h1{margin:5px 0 3px;font-size:clamp(23px,3vw,32px)}header p{margin:0;color:#e5effb}
+main{max-width:1250px;margin:22px auto;padding:0 16px 35px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:17px;box-shadow:0 5px 18px #12345a0a}
+h2{margin:0 0 14px;color:var(--navy);font-size:20px}h3{margin:0 0 8px;font-size:16px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.formgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+label{display:block;font-weight:700;font-size:13px;margin:7px 0 5px;color:#344b60}input,select,textarea{width:100%;border:1px solid #bfccda;border-radius:9px;padding:11px 12px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:76px;resize:vertical}
+button,.button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:9px;padding:11px 14px;font:700 14px "Segoe UI",Arial;cursor:pointer;text-decoration:none;background:var(--blue);color:#fff}
+button:hover,.button:hover{filter:brightness(.95)}button.secondary,.button.secondary{background:#eaf1f8;color:var(--navy)}button.success{background:var(--green)}button.danger{background:var(--red)}button.warn{background:#fff1d6;color:#805300}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}
+.notice{border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff4d8;color:#684b00}.error{background:#ffebee;color:#9d1c2a}.successbox{background:#e8f7ef;color:#176342}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:17px}.metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}.metric span{display:block;color:var(--muted);font-size:13px}.metric strong{font-size:27px;color:var(--navy)}
+.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.toolbar>div{min-width:180px;flex:1}.appointment{border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:15px;margin:10px 0;background:#fff}.appointment.status-atendido{border-left-color:var(--green)}.appointment.status-cancelado{border-left-color:var(--red);opacity:.82}.appointment.status-faltou{border-left-color:#a36c00}
+.appthead{display:flex;justify-content:space-between;gap:10px;align-items:start;flex-wrap:wrap}.time{font-size:20px;font-weight:800;color:var(--navy)}.pill{display:inline-block;border-radius:30px;padding:4px 9px;font-size:12px;font-weight:800;background:#eaf1f8;color:var(--navy)}.pill.online{background:#e8f2ff;color:#185aa6}.pill.presencial{background:#e7f7ef;color:#176342}.pill.cancel{background:#ffebee;color:#a61e2c}.pill.pending{background:#fff4d8;color:#805300}
+.login{max-width:500px;margin:30px auto}.login .panel{padding:25px}.rowend{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.statusbar{font-size:13px;color:var(--muted)}.empty{text-align:center;padding:25px;color:var(--muted);background:#f7f9fc;border-radius:10px}
+@media(max-width:850px){.grid,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){main{padding:0 10px 25px}.panel{padding:14px}.grid,.cards,.formgrid{grid-template-columns:1fr}.headrow{align-items:start}button,.button{width:100%}.actions{display:grid;grid-template-columns:1fr}.metric strong{font-size:24px}}
+</style>
+</head>
+<body>
+<header><div class="headrow"><div><div class="brand">COOPERTAXI-BH · SETOR JURÍDICO</div><h1>Agenda Jurídica Compartilhada</h1><p>Agendamentos, consultas on-line e presenciais e acompanhamento.</p></div><div id="userHeader" class="hidden"><div id="userInfo"></div><button class="secondary" id="logoutBtn">Sair</button></div></div></header>
+<div id="loginView" class="login">
+ <section class="panel"><h2>Acesso à agenda</h2><p class="muted">Entre com a conta autorizada da recepção ou da advogada.</p>
+ <div id="loginNotice" class="notice hidden"></div>
+ <form id="loginForm"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required>
+ <label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required>
+ <div class="actions"><button type="submit">Entrar na agenda</button></div></form>
+ <p class="muted">O acesso depende de uma conta cadastrada e autorizada no sistema.</p></section>
+</div>
+<main id="appView" class="hidden">
+ <div id="appNotice" class="notice hidden"></div>
+ <section class="panel">
+  <div class="rowend"><div><h2 id="formTitle">Novo agendamento</h2><p class="muted">Registre apenas informações administrativas necessárias. Não inclua detalhes confidenciais do caso.</p></div><span id="rolePill" class="pill"></span></div>
+  <form id="appointmentForm">
+   <input type="hidden" id="appointmentId">
+   <div class="formgrid">
+    <div><label for="driverNumber">Numeral / prefixo</label><input id="driverNumber" maxlength="30" placeholder="Ex.: 125" required></div>
+    <div><label for="driverName">Nome do motorista</label><input id="driverName" maxlength="100" placeholder="Nome completo" required></div>
+    <div><label for="phone">Telefone (opcional)</label><input id="phone" type="tel" maxlength="30" placeholder="Telefone para confirmação"></div>
+    <div><label for="date">Data</label><input id="date" type="date" required></div>
+    <div><label for="time">Horário</label><input id="time" type="time" required></div>
+    <div><label for="mode">Modalidade</label><select id="mode"><option value="online">On-line — Google Meet</option><option value="central">On-line na sala jurídica</option><option value="presencial">Presencial com a advogada</option></select></div>
+    <div><label for="status">Situação</label><select id="status"><option value="solicitado">Solicitado</option><option value="confirmado">Confirmado</option><option value="em_atendimento">Em atendimento</option><option value="atendido">Atendido</option><option value="remarcar">Precisa remarcar</option><option value="faltou">Não compareceu</option><option value="cancelado">Cancelado</option><option value="retorno">Retorno pendente</option></select></div>
+    <div><label for="meetLink">Link da reunião (Meet)</label><input id="meetLink" type="url" placeholder="https://meet.google.com/..." maxlength="500"></div>
+    <div><label for="followDate">Data de retorno (se houver)</label><input id="followDate" type="date"></div>
+   </div>
+   <label for="adminNote">Observação administrativa (não incluir conteúdo jurídico confidencial)</label><textarea id="adminNote" maxlength="500" placeholder="Ex.: trazer documento solicitado; confirmar horário."></textarea>
+   <div class="actions"><button type="submit" id="saveBtn">Salvar agendamento</button><button type="button" class="secondary" id="newBtn">Limpar formulário</button><button type="button" class="secondary" id="meetHelpBtn">Criar reunião no Google Meet</button></div>
+   <p class="muted">O botão do Meet abre a ferramenta para criar a reunião. Depois, copie o link gerado e cole no campo acima. O sistema não cria automaticamente uma reunião na conta Google.</p>
+  </form>
+ </section>
+ <section class="cards">
+  <div class="metric"><span>Agendados no filtro</span><strong id="countBooked">0</strong></div>
+  <div class="metric"><span>Atendidos</span><strong id="countDone">0</strong></div>
+  <div class="metric"><span>Em atendimento</span><strong id="countLive">0</strong></div>
+  <div class="metric"><span>Retornos pendentes</span><strong id="countFollow">0</strong></div>
+ </section>
+ <section class="panel">
+  <div class="rowend"><div><h2>Agenda compartilhada</h2><p class="muted">As alterações são sincronizadas para os usuários autorizados.</p></div><button class="secondary" id="exportBtn">Exportar relatório CSV</button></div>
+  <div class="toolbar">
+   <div><label for="filterDate">Filtrar por dia</label><input type="date" id="filterDate"></div>
+   <div><label for="filterStatus">Situação</label><select id="filterStatus"><option value="todos">Todas as situações</option><option value="solicitado">Solicitado</option><option value="confirmado">Confirmado</option><option value="em_atendimento">Em atendimento</option><option value="atendido">Atendido</option><option value="remarcar">Precisa remarcar</option><option value="faltou">Não compareceu</option><option value="cancelado">Cancelado</option><option value="retorno">Retorno pendente</option></select></div>
+   <div><label for="searchText">Buscar motorista</label><input id="searchText" placeholder="Numeral ou nome"></div>
+  </div>
+  <div id="appointmentList" aria-live="polite"><div class="empty">Entre no sistema para carregar a agenda.</div></div>
+ </section>
+ <p class="statusbar" id="syncStatus">Agenda não conectada.</p>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyC58wsopM1NySU4EZclGuwhgzVUeVf4B_k",authDomain:"senha-36ecb.firebaseapp.com",projectId:"senha-36ecb",storageBucket:"senha-36ecb.firebasestorage.app",messagingSenderId:"512666147464",appId:"1:512666147464:web:8b040b147f27314ffa5d3d"};
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore();
+const $=id=>document.getElementById(id);
+let currentUser=null,currentRole="",appointments=[],unsubscribe=null,profileUnsub=null;
+const statuses={solicitado:"Solicitado",confirmado:"Confirmado",em_atendimento:"Em atendimento",atendido:"Atendido",remarcar:"Precisa remarcar",faltou:"Não compareceu",cancelado:"Cancelado",retorno:"Retorno pendente"};
+const esc=v=>String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+function notice(text,error){$("appNotice").textContent=text;$("appNotice").classList.remove("hidden","error","successbox");$("appNotice").classList.add(error?"error":"successbox");}
+function loginNotice(text){$("loginNotice").textContent=text;$("loginNotice").classList.remove("hidden");}
+function showLoggedOut(){ $("loginView").classList.remove("hidden");$("appView").classList.add("hidden");$("userHeader").classList.add("hidden");}
+function showLoggedIn(profile){$("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("userHeader").classList.remove("hidden");$("userInfo").textContent=(profile.nome||currentUser.email)+" · "+(currentRole==="advogada"?"Advogada":"Recepção");$("rolePill").textContent=currentRole==="advogada"?"Perfil: Advogada":"Perfil: Recepção";$("syncStatus").textContent="Conectado como "+currentUser.email;}
+function resetForm(){ $("appointmentForm").reset();$("appointmentId").value="";$("date").value=$("filterDate").value||today();$("status").value="solicitado";$("formTitle").textContent="Novo agendamento";$("saveBtn").textContent="Salvar agendamento";}
+function canManageAll(){return currentRole==="advogada"||currentRole==="recepcao";}
+function normalizeDigits(s){return String(s||"").trim().toLocaleLowerCase("pt-BR");}
+function filtered(){const day=$("filterDate").value,st=$("filterStatus").value,q=normalizeDigits($("searchText").value);return appointments.filter(a=>(!day||a.data===day)&&(st==="todos"||a.status===st)&&(!q||normalizeDigits(a.numeral).includes(q)||normalizeDigits(a.nome).includes(q))).sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));}
+function pillFor(a){if(a.status==="atendido")return "pill presencial";if(a.status==="cancelado")return "pill cancel";if(["solicitado","remarcar","retorno","faltou"].includes(a.status))return "pill pending";return "pill";}
+function render(){
+ const list=$("appointmentList"),items=filtered();
+ $("countBooked").textContent=appointments.filter(a=>a.status!=="cancelado").length;
+ $("countDone").textContent=appointments.filter(a=>a.status==="atendido").length;
+ $("countLive").textContent=appointments.filter(a=>a.status==="em_atendimento").length;
+ $("countFollow").textContent=appointments.filter(a=>a.status==="retorno"||a.status==="remarcar").length;
+ if(!items.length){list.innerHTML='<div class="empty">Nenhum agendamento encontrado para esses filtros.</div>';return;}
+ list.innerHTML=items.map(a=>{
+  const mode=a.modalidade==="online"?"On-line · Google Meet":a.modalidade==="central"?"On-line na sala jurídica":"Presencial";
+  const modeClass=a.modalidade==="presencial"?"presencial":"online";
+  const link=a.linkReuniao?'<a class="button" href="'+esc(a.linkReuniao)+'" target="_blank" rel="noopener noreferrer">Abrir reunião</a><button class="secondary" data-copy="'+esc(a.id)+'">Copiar link</button>':"";
+  const whatsapp=a.telefone?'<button class="secondary" data-whatsapp="'+esc(a.id)+'">Mensagem WhatsApp</button>':"";
+  return '<article class="appointment status-'+esc(a.status)+'"><div class="appthead"><div><div class="time">'+esc(a.hora)+' · '+esc(a.data.split("-").reverse().join("/"))+'</div><h3>'+esc(a.nome)+' <span class="muted">· Numeral '+esc(a.numeral)+'</span></h3><span class="pill '+modeClass+'">'+mode+'</span></div><span class="'+pillFor(a)+'">'+esc(statuses[a.status]||a.status)+'</span></div>'+
+  (a.telefone?'<p class="muted">Telefone: '+esc(a.telefone)+'</p>':'')+
+  (a.observacao?'<p><b>Nota administrativa:</b> '+esc(a.observacao)+'</p>':'')+
+  (a.dataRetorno?'<p><b>Retorno:</b> '+esc(a.dataRetorno.split("-").reverse().join("/"))+'</p>':'')+
+  '<div class="actions">'+link+whatsapp+'<button class="secondary" data-edit="'+esc(a.id)+'">Editar</button><button class="success" data-status="em_atendimento" data-id="'+esc(a.id)+'">Iniciar</button><button class="success" data-status="atendido" data-id="'+esc(a.id)+'">Atendido</button><button class="warn" data-status="retorno" data-id="'+esc(a.id)+'">Retorno</button><button class="secondary" data-status="remarcar" data-id="'+esc(a.id)+'">Remarcar</button><button class="danger" data-status="cancelado" data-id="'+esc(a.id)+'">Cancelar</button></div></article>';
+ }).join("");
+ list.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editAppointment(b.dataset.edit));
+ list.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>changeStatus(b.dataset.id,b.dataset.status));
+ list.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>copyMeeting(b.dataset.copy));
+ list.querySelectorAll("[data-whatsapp]").forEach(b=>b.onclick=()=>whatsappMessage(b.dataset.whatsapp));
+}
+function editAppointment(id){const a=appointments.find(x=>x.id===id);if(!a)return;
+ $("appointmentId").value=a.id;$("driverNumber").value=a.numeral||"";$("driverName").value=a.nome||"";$("phone").value=a.telefone||"";$("date").value=a.data||"";$("time").value=a.hora||"";$("mode").value=a.modalidade||"online";$("status").value=a.status||"solicitado";$("meetLink").value=a.linkReuniao||"";$("followDate").value=a.dataRetorno||"";$("adminNote").value=a.observacao||"";$("formTitle").textContent="Editar agendamento";$("saveBtn").textContent="Salvar alterações";window.scrollTo({top:0,behavior:"smooth"});}
+async function changeStatus(id,status){try{await db.collection("agenda_juridica").doc(id).update({status:status,atualizadoEm:Date.now(),atualizadoPor:currentUser.uid});notice("Situação atualizada: "+statuses[status]+".");}catch(e){notice("Não foi possível atualizar. Confira a conexão e as permissões do Firebase.",true);}}
+async function copyMeeting(id){const a=appointments.find(x=>x.id===id);if(!a||!a.linkReuniao)return;try{await navigator.clipboard.writeText(a.linkReuniao);notice("Link da reunião copiado.");}catch(e){prompt("Copie o link da reunião:",a.linkReuniao);}}
+function whatsappMessage(id){const a=appointments.find(x=>x.id===id);if(!a||!a.telefone)return;let num=a.telefone.replace(/\D/g,"");if(num.length===11||num.length===10)num="55"+num;const link=a.linkReuniao?" Link da reunião: "+a.linkReuniao:"";const msg="Olá, "+a.nome+". Seu atendimento jurídico na Coopertaxi está agendado para "+a.data.split("-").reverse().join("/")+" às "+a.hora+". Modalidade: "+(a.modalidade==="presencial"?"presencial": "on-line")+". Por favor, confirme sua disponibilidade."+link;window.open("https://wa.me/"+num+"?text="+encodeURIComponent(msg),"_blank","noopener");}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();try{await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value);$("loginNotice").classList.add("hidden");}catch(err){loginNotice("Não foi possível entrar. Confira o e-mail, a senha e se a conta foi cadastrada no Firebase Authentication.");}});
+$("logoutBtn").onclick=()=>auth.signOut();
+$("appointmentForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentUser)return;
+ const data={numeral:$("driverNumber").value.trim(),nome:$("driverName").value.trim(),telefone:$("phone").value.trim(),data:$("date").value,hora:$("time").value,modalidade:$("mode").value,status:$("status").value,linkReuniao:$("meetLink").value.trim(),dataRetorno:$("followDate").value,observacao:$("adminNote").value.trim(),atualizadoEm:Date.now(),atualizadoPor:currentUser.uid};
+ if(!data.data||!data.hora||!data.nome||!data.numeral){notice("Preencha numeral, nome, data e horário.",true);return;}
+ if(data.linkReuniao&&!/^https:\/\/(meet\.google\.com|teams\.microsoft\.com|zoom\.us)\//i.test(data.linkReuniao)){notice("Use um link HTTPS válido do Google Meet, Microsoft Teams ou Zoom.",true);return;}
+ try{
+  const id=$("appointmentId").value;
+  if(id){await db.collection("agenda_juridica").doc(id).update(data);notice("Agendamento atualizado.");}
+  else{data.criadoEm=Date.now();data.criadoPor=currentUser.uid;await db.collection("agenda_juridica").add(data);notice("Agendamento salvo e compartilhado.");}
+  resetForm();
+ }catch(err){notice("Não foi possível salvar. Verifique se as regras de segurança e o perfil de acesso foram configurados no Firebase.",true);}
+});
+$("newBtn").onclick=resetForm;
+$("meetHelpBtn").onclick=()=>window.open("https://meet.google.com/new","_blank","noopener");
+["filterDate","filterStatus","searchText"].forEach(id=>$(id).addEventListener("input",render));
+$("exportBtn").onclick=()=>{
+ const rows=[["Data","Hora","Numeral","Motorista","Telefone","Modalidade","Situação","Link da reunião","Data retorno","Observação administrativa"]];
+ filtered().forEach(a=>rows.push([a.data,a.hora,a.numeral,a.nome,a.telefone,a.modalidade,statuses[a.status]||a.status,a.linkReuniao,a.dataRetorno,a.observacao]));
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="Relatorio_Agenda_Juridica_"+today()+".csv";link.click();URL.revokeObjectURL(url);
+};
+auth.onAuthStateChanged(user=>{
+ currentUser=user;
+ if(!user){if(unsubscribe)unsubscribe();if(profileUnsub)profileUnsub();unsubscribe=null;profileUnsub=null;currentRole="";appointments=[];showLoggedOut();return;}
+ if(profileUnsub)profileUnsub();
+ profileUnsub=db.collection("usuarios_juridico").doc(user.uid).onSnapshot(doc=>{
+  if(!doc.exists||doc.data().ativo!==true||!["advogada","recepcao"].includes(doc.data().perfil)){
+   currentRole="";$("loginView").classList.remove("hidden");$("appView").classList.add("hidden");$("userHeader").classList.remove("hidden");$("userInfo").textContent=user.email;
+   loginNotice("Sua conta entrou, mas ainda não está autorizada. O administrador precisa cadastrar seu UID em usuarios_juridico com perfil advogada ou recepcao e ativo=true.");return;
+  }
+  currentRole=doc.data().perfil;showLoggedIn(doc.data());
+  if(unsubscribe)unsubscribe();
+  unsubscribe=db.collection("agenda_juridica").orderBy("data").limit(500).onSnapshot(snap=>{
+   appointments=snap.docs.map(d=>({id:d.id,...d.data()}));render();$("syncStatus").textContent="Sincronizado em tempo real · "+new Date().toLocaleTimeString("pt-BR");
+  },err=>{$("syncStatus").textContent="Erro de sincronização. Confira as regras do Firestore.";notice("A agenda não conseguiu carregar. As regras de segurança do Firestore precisam permitir acesso somente aos usuários autorizados.",true);});
+ },err=>{loginNotice("Não foi possível verificar seu perfil. Confira a configuração de segurança do Firestore.");});
+});
+$("date").value=today();$("filterDate").value=today();
+</script>
+</body></html>
